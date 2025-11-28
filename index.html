@@ -36,7 +36,7 @@
     <!-- 初始化遮罩 -->
     <div id="init-overlay">
       <div class="loader" style="width: 50px; height: 50px; border-width: 5px;"></div>
-      <p class="mt-4 text-gray-700 font-bold text-lg tracking-wider">正在連線至資料庫...</p>
+      <p class="mt-4 text-gray-700 font-bold text-lg tracking-wider" id="loadingText">正在連線至資料庫...</p>
     </div>
 
     <div class="max-w-7xl mx-auto bg-white shadow-xl min-h-screen flex flex-col">
@@ -117,7 +117,8 @@
       const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzxYjvNpQHo_sYK3QE9ntaqLfBnOGrWl0QniKFJjJ0KLCHgIp8ECJMRW-Vnm1mpLmISjw/exec"; 
       // 範例格式： https://script.google.com/macros/s/AKfycbx..../exec
       // ==========================================
-
+      
+      const CACHE_KEY = "school_structure_cache_v1"; // 快取鍵名
       var schoolStructure = {}; 
 
       // 1. 網頁載入時
@@ -127,22 +128,51 @@
           document.getElementById('init-overlay').style.display = 'none';
           return;
         }
-        
-        // 呼叫 API: op=structure
+
+        // --- 快取優化策略 ---
+        // 1. 先嘗試讀取本地快取，如果有資料，直接顯示介面 (不用等 API)
+        const cachedData = localStorage.getItem(CACHE_KEY);
+        if (cachedData) {
+          try {
+            console.log("讀取到本地快取，快速啟動...");
+            initDropdowns(JSON.parse(cachedData));
+            // 如果有快取，直接隱藏遮罩
+            document.getElementById('init-overlay').style.display = 'none';
+          } catch (e) {
+            console.error("快取資料損毀，將重新抓取");
+          }
+        }
+
+        // 2. 無論有無快取，都在背景呼叫 API 更新資料 (保持資料最新)
         fetch(`${GAS_API_URL}?op=structure`)
           .then(res => res.json())
-          .then(data => initDropdowns(data))
+          .then(data => {
+            console.log("取得最新雲端資料");
+            // 更新快取
+            localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+            // 更新畫面 (如果剛剛沒快取，這裡會初始化；如果有快取，這裡會確保是新的)
+            initDropdowns(data);
+          })
           .catch(err => {
             console.error(err);
-            alert("讀取資料失敗，請檢查 GAS 部署權限是否為「任何人」");
-            document.getElementById('init-overlay').style.display = 'none';
+            // 如果沒快取又連線失敗，才顯示錯誤
+            if (!cachedData) {
+              alert("讀取資料失敗，請檢查 GAS 部署權限是否為「任何人」");
+              document.getElementById('init-overlay').style.display = 'none';
+            }
           });
       };
 
       // 2. 初始化選單
       function initDropdowns(structure) {
+        // 記錄當前選到的值 (避免更新時重置使用者的選擇)
+        const currentYear = document.getElementById('yearSelect').value;
+        const currentClass = document.getElementById('classSelect').value;
+
         schoolStructure = structure;
         var yearSelect = document.getElementById('yearSelect');
+        
+        // 暫存目前的選項
         yearSelect.innerHTML = "";
 
         var years = Object.keys(structure).sort((a, b) => a - b);
@@ -158,12 +188,22 @@
           opt.value = y; opt.innerText = y; yearSelect.appendChild(opt);
         });
 
-        updateClassOptions();
+        // 如果之前有選過年級且該年級還在，就維持選擇；否則選第一個
+        if (currentYear && years.includes(currentYear)) {
+            yearSelect.value = currentYear;
+        } else {
+            yearSelect.value = years[0];
+        }
+
+        // 更新班級 (並嘗試維持班級選擇)
+        updateClassOptions(currentClass);
+        
+        // 確保遮罩隱藏
         document.getElementById('init-overlay').style.display = 'none';
       }
 
       // 3. 更新班級
-      function updateClassOptions() {
+      function updateClassOptions(preserveClassValue = null) {
         var yearSelect = document.getElementById('yearSelect');
         var classSelect = document.getElementById('classSelect');
         classSelect.innerHTML = ""; 
@@ -174,6 +214,11 @@
             var opt = document.createElement('option');
             opt.value = c; opt.innerText = c; classSelect.appendChild(opt);
           });
+          
+          // 如果有傳入要保留的班級，且該班級存在，就選取它
+          if (preserveClassValue && classes.includes(preserveClassValue)) {
+              classSelect.value = preserveClassValue;
+          }
         } else {
            classSelect.innerHTML = "<option>--</option>";
         }

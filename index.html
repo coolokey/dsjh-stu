@@ -36,7 +36,8 @@
     <!-- 初始化遮罩 -->
     <div id="init-overlay">
       <div class="loader" style="width: 50px; height: 50px; border-width: 5px;"></div>
-      <p class="mt-4 text-gray-700 font-bold text-lg tracking-wider" id="loadingText">正在連線至資料庫...</p>
+      <p class="mt-4 text-gray-700 font-bold text-lg tracking-wider" id="loadingText">正在下載資料庫...</p>
+      <p class="mt-2 text-gray-400 text-sm hidden" id="errorDetail"></p>
     </div>
 
     <div class="max-w-7xl mx-auto bg-white shadow-xl min-h-screen flex flex-col">
@@ -82,7 +83,7 @@
       <div class="p-4 md:p-8 overflow-x-auto flex-grow bg-white">
         <div id="loadingMsg" class="hidden text-center text-gray-500 py-16">
           <div class="loader mr-2"></div> 
-          <span class="text-xl font-medium text-gray-600">資料讀取中，請稍候...</span>
+          <span class="text-xl font-medium text-gray-600">資料讀取中...</span>
         </div>
 
         <table id="resultTable" class="w-full text-left border-collapse hidden min-w-[900px]">
@@ -106,73 +107,109 @@
       </div>
       
       <div class="bg-gray-50 p-3 text-center text-gray-400 text-sm border-t border-gray-200">
-        系統設計：溪中資訊組
+        系統設計：GitHub Pages (Static JSON)
       </div>
     </div>
 
     <script>
       // ==========================================
-      // 【設定區】請填入你的 GAS 部署網址
+      // 【設定區】請設定您的 JSON 資料檔路徑
       // ==========================================
-      const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzxYjvNpQHo_sYK3QE9ntaqLfBnOGrWl0QniKFJjJ0KLCHgIp8ECJMRW-Vnm1mpLmISjw/exec"; 
-      // 範例格式： https://script.google.com/macros/s/AKfycbx..../exec
+      const JSON_DATA_URL = "students.json"; 
       // ==========================================
       
-      const CACHE_KEY = "school_structure_cache_v1"; // 快取鍵名
-      var schoolStructure = {}; 
+      var allStudentData = []; // 儲存所有學生資料
+      var schoolStructure = {}; // 儲存年級結構
 
-      // 1. 網頁載入時
+      // 1. 網頁載入時：一次下載所有資料
       window.onload = function() {
-        if (GAS_API_URL.includes("你的_GAS_部署_ID")) {
-          alert("請先在 index.html 程式碼中設定正確的 GAS_API_URL！");
-          document.getElementById('init-overlay').style.display = 'none';
-          return;
-        }
+        
+        // 顯示載入中
+        document.getElementById('init-overlay').style.display = 'flex';
 
-        // --- 快取優化策略 ---
-        // 1. 先嘗試讀取本地快取，如果有資料，直接顯示介面 (不用等 API)
-        const cachedData = localStorage.getItem(CACHE_KEY);
-        if (cachedData) {
-          try {
-            console.log("讀取到本地快取，快速啟動...");
-            initDropdowns(JSON.parse(cachedData));
-            // 如果有快取，直接隱藏遮罩
-            document.getElementById('init-overlay').style.display = 'none';
-          } catch (e) {
-            console.error("快取資料損毀，將重新抓取");
-          }
+        // ★修正重點：加入 try-catch 與錯誤處理，防止在預覽環境下報錯
+        try {
+          fetch(JSON_DATA_URL)
+            .then(res => {
+              if (!res.ok) throw new Error("網路回應錯誤 (404/500) 或找不到檔案");
+              return res.json();
+            })
+            .then(data => {
+              console.log("資料下載成功，共 " + data.length + " 筆");
+              allStudentData = data;
+              parseStructure(data);
+              initDropdowns(schoolStructure);
+            })
+            .catch(err => {
+              console.warn("無法讀取 students.json，啟用預覽模擬模式:", err);
+              // 啟用模擬資料，讓介面在預覽時也能操作
+              useMockData(err.message);
+            });
+        } catch (e) {
+          // 捕捉同步錯誤 (如 URL 解析失敗)
+          console.warn("Fetch 執行失敗，啟用預覽模擬模式:", e);
+          useMockData(e.message);
         }
-
-        // 2. 無論有無快取，都在背景呼叫 API 更新資料 (保持資料最新)
-        fetch(`${GAS_API_URL}?op=structure`)
-          .then(res => res.json())
-          .then(data => {
-            console.log("取得最新雲端資料");
-            // 更新快取
-            localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-            // 更新畫面 (如果剛剛沒快取，這裡會初始化；如果有快取，這裡會確保是新的)
-            initDropdowns(data);
-          })
-          .catch(err => {
-            console.error(err);
-            // 如果沒快取又連線失敗，才顯示錯誤
-            if (!cachedData) {
-              alert("讀取資料失敗，請檢查 GAS 部署權限是否為「任何人」");
-              document.getElementById('init-overlay').style.display = 'none';
-            }
-          });
       };
 
-      // 2. 初始化選單
-      function initDropdowns(structure) {
-        // 記錄當前選到的值 (避免更新時重置使用者的選擇)
-        const currentYear = document.getElementById('yearSelect').value;
-        const currentClass = document.getElementById('classSelect').value;
+      // ★新增：使用模擬資料的函式 (防呆用)
+      function useMockData(errorMsg) {
+        // 模擬資料
+        var mockData = [
+          {"year": "7", "class": "01", "seat": "01", "id": "1120001", "name": "預覽-王小明", "email": "demo1@dsjh.tyc.edu.tw", "scratch": "s1120001", "learn": "L1120001"},
+          {"year": "7", "class": "01", "seat": "02", "id": "1120002", "name": "預覽-陳大文", "email": "demo2@dsjh.tyc.edu.tw", "scratch": "s1120002", "learn": "L1120002"},
+          {"year": "8", "class": "05", "seat": "05", "id": "1110505", "name": "預覽-林小美", "email": "demo3@dsjh.tyc.edu.tw", "scratch": "s1110505", "learn": "L1110505"},
+          {"year": "9", "class": "08", "seat": "01", "id": "1100801", "name": "預覽-張志豪", "email": "demo4@dsjh.tyc.edu.tw", "scratch": "s1100801", "learn": "L1100801"}
+        ];
 
-        schoolStructure = structure;
-        var yearSelect = document.getElementById('yearSelect');
+        console.log("已載入模擬資料 (共 " + mockData.length + " 筆)");
+        allStudentData = mockData;
+        parseStructure(mockData);
+        initDropdowns(schoolStructure);
         
-        // 暫存目前的選項
+        // 更新 UI 提示使用者目前是預覽模式
+        var loadingText = document.getElementById('loadingText');
+        var errorDetail = document.getElementById('errorDetail');
+        if (loadingText) loadingText.innerText = "預覽模式 (無資料檔)";
+        if (errorDetail) {
+           errorDetail.innerText = "原因: " + errorMsg;
+           errorDetail.classList.remove('hidden');
+        }
+
+        // 稍微停留一下讓使用者看到提示，再進入系統
+        setTimeout(function() {
+           document.getElementById('init-overlay').style.display = 'none';
+        }, 800);
+      }
+
+      // 解析年級與班級結構
+      function parseStructure(data) {
+        schoolStructure = {};
+        
+        data.forEach(student => {
+          let y = String(student.year || "").trim();
+          let c = String(student.class || "").trim();
+          
+          if (y && c) {
+            if (c.length === 1) c = "0" + c;
+            
+            if (!schoolStructure[y]) {
+              schoolStructure[y] = [];
+            }
+            if (!schoolStructure[y].includes(c)) {
+              schoolStructure[y].push(c);
+            }
+          }
+        });
+        
+        for (let y in schoolStructure) {
+          schoolStructure[y].sort();
+        }
+      }
+
+      // 初始化選單
+      function initDropdowns(structure) {
+        var yearSelect = document.getElementById('yearSelect');
         yearSelect.innerHTML = "";
 
         var years = Object.keys(structure).sort((a, b) => a - b);
@@ -188,46 +225,34 @@
           opt.value = y; opt.innerText = y; yearSelect.appendChild(opt);
         });
 
-        // 如果之前有選過年級且該年級還在，就維持選擇；否則選第一個
-        if (currentYear && years.includes(currentYear)) {
-            yearSelect.value = currentYear;
-        } else {
-            yearSelect.value = years[0];
-        }
-
-        // 更新班級 (並嘗試維持班級選擇)
-        updateClassOptions(currentClass);
-        
-        // 確保遮罩隱藏
+        updateClassOptions();
         document.getElementById('init-overlay').style.display = 'none';
       }
 
-      // 3. 更新班級
-      function updateClassOptions(preserveClassValue = null) {
+      // 更新班級選單
+      function updateClassOptions() {
         var yearSelect = document.getElementById('yearSelect');
         var classSelect = document.getElementById('classSelect');
         classSelect.innerHTML = ""; 
         
-        var classes = schoolStructure[yearSelect.value];
+        var selectedYear = yearSelect.value;
+        var classes = schoolStructure[selectedYear];
+        
         if (classes) {
           classes.forEach(c => {
             var opt = document.createElement('option');
             opt.value = c; opt.innerText = c; classSelect.appendChild(opt);
           });
-          
-          // 如果有傳入要保留的班級，且該班級存在，就選取它
-          if (preserveClassValue && classes.includes(preserveClassValue)) {
-              classSelect.value = preserveClassValue;
-          }
         } else {
            classSelect.innerHTML = "<option>--</option>";
         }
       }
 
-      // 4. 查詢
+      // 查詢 (本地極速篩選)
       function search() {
         var year = document.getElementById('yearSelect').value;
         var cls = document.getElementById('classSelect').value;
+        
         if (!year || !cls) { alert("請選擇完整"); return; }
 
         document.getElementById('headerInfo').innerText = `查詢中：${year} 年 ${cls} 班...`;
@@ -236,18 +261,20 @@
         document.getElementById('noDataMsg').classList.add('hidden');
         document.getElementById('searchBtn').disabled = true;
 
-        // 呼叫 API: op=search
-        fetch(`${GAS_API_URL}?op=search&year=${year}&class=${cls}`)
-          .then(res => res.json())
-          .then(data => showData(data))
-          .catch(err => {
-            console.error(err);
-            alert("查詢失敗");
-            document.getElementById('searchBtn').disabled = false;
-          });
+        setTimeout(() => {
+            const results = allStudentData.filter(student => {
+                let sy = String(student.year || "").trim();
+                let sc = String(student.class || "").trim();
+                if (sc.length === 1) sc = "0" + sc; 
+                return sy === year && sc === cls;
+            });
+            
+            results.sort((a, b) => Number(a.seat) - Number(b.seat));
+            showData(results);
+        }, 200);
       }
 
-      // 5. 顯示資料
+      // 顯示資料 (包含連結功能)
       function showData(data) {
         var tbody = document.getElementById('tableBody');
         tbody.innerHTML = ""; 
@@ -258,7 +285,7 @@
         var cls = document.getElementById('classSelect').value;
         document.getElementById('headerInfo').innerText = `班級：${year} 年 ${cls} 班 一般班`;
 
-        if (!data || data.length === 0 || data.error) {
+        if (!data || data.length === 0) {
           document.getElementById('noDataMsg').classList.remove('hidden');
           return;
         }

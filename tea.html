@@ -14,9 +14,10 @@
     <style>
         body {
             font-family: 'Noto Sans TC', sans-serif;
-            background-color: #f8fafc;
+            background-color: #f8fafc; /* 回歸較明亮的背景色 */
+            color: #1f2937; /* Gray-800 */
         }
-        /* Custom scrollbar for tab navigation on mobile */
+        /* Hide scrollbar for tabs */
         .hide-scrollbar::-webkit-scrollbar {
             display: none;
         }
@@ -24,91 +25,103 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+        /* Custom smooth hover for table rows */
+        .table-row-hover {
+            transition: background-color 0.15s ease-in-out;
+        }
         .table-row-hover:hover {
-            background-color: #f1f5f9;
+            background-color: #eff6ff; /* Blue-50 hover effect */
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col selection:bg-blue-200 selection:text-blue-900">
 
-    <!-- Navbar -->
-    <nav class="bg-blue-700 text-white shadow-md sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+    <!-- Navbar: Reverted to solid Blue-600 -->
+    <nav class="bg-blue-600 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-3">
                 <i class="fa-solid fa-school text-2xl"></i>
-                <h1 class="text-xl font-bold tracking-wide">大溪國中教師通訊錄</h1>
+                <!-- Font size kept large -->
+                <h1 class="text-2xl font-bold tracking-wide">大溪國中教師通訊錄</h1>
             </div>
         </div>
     </nav>
 
     <!-- Main Content -->
-    <main class="flex-grow max-w-6xl mx-auto px-4 py-6 w-full">
+    <main class="flex-grow max-w-6xl mx-auto px-4 sm:px-6 py-6 w-full">
         
         <!-- Search Section -->
-        <div class="bg-white rounded-lg shadow-sm p-4 mb-6 border border-gray-200">
-            <div class="relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6 border border-gray-200">
+            <!-- Font size kept large -->
+            <label for="searchInput" class="block text-base font-bold text-gray-700 mb-2 ml-1">快速搜尋</label>
+            <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i class="fa-solid fa-magnifying-glass text-lg text-gray-400 group-focus-within:text-blue-500 transition-colors"></i>
                 </div>
+                <!-- Font size kept large -->
                 <input type="text" id="searchInput" 
-                    class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 sm:text-sm transition duration-150 ease-in-out" 
-                    placeholder="搜尋姓名、職稱 (例如: 林晏瑄, 701, 數學, 主任)...">
+                    class="block w-full pl-12 pr-4 py-3 bg-white border border-gray-300 rounded-lg leading-5 placeholder-gray-400 text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-lg transition-all duration-200 ease-in-out" 
+                    placeholder="輸入姓名、職稱關鍵字 (例如: 林晏瑄, 701, 數學, 主任)...">
             </div>
         </div>
 
         <!-- Filter Tabs -->
-        <div class="mb-4 overflow-x-auto hide-scrollbar">
-            <div class="flex space-x-2 min-w-max" id="categoryTabs">
-                <button onclick="filterCategory('all')" class="tab-btn active px-4 py-2 rounded-full text-sm font-medium bg-blue-600 text-white transition-colors duration-200 hover:bg-blue-700 shadow-sm">
+        <div class="mb-6 overflow-x-auto hide-scrollbar pb-2">
+            <div class="flex space-x-2 min-w-max px-1" id="categoryTabs">
+                <!-- Reverted to Blue theme buttons -->
+                <!-- Font size kept large (text-base) -->
+                <button onclick="filterCategory('all')" class="tab-btn active px-6 py-2.5 rounded-full text-base font-medium bg-blue-600 text-white shadow hover:bg-blue-700 transition-colors duration-200">
                     全部顯示
                 </button>
-                <button onclick="filterCategory('admin')" class="tab-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 transition-colors duration-200">
+                <button onclick="filterCategory('admin')" class="tab-btn px-6 py-2.5 rounded-full text-base font-medium bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:text-gray-800 transition-colors duration-200">
                     行政人員
                 </button>
-                <button onclick="filterCategory('homeroom')" class="tab-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 transition-colors duration-200">
+                <button onclick="filterCategory('homeroom')" class="tab-btn px-6 py-2.5 rounded-full text-base font-medium bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:text-gray-800 transition-colors duration-200">
                     導師
                 </button>
-                <button onclick="filterCategory('teacher')" class="tab-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 transition-colors duration-200">
+                <button onclick="filterCategory('teacher')" class="tab-btn px-6 py-2.5 rounded-full text-base font-medium bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:text-gray-800 transition-colors duration-200">
                     專任教師
                 </button>
-                <button onclick="filterCategory('substitute')" class="tab-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 transition-colors duration-200">
+                <button onclick="filterCategory('substitute')" class="tab-btn px-6 py-2.5 rounded-full text-base font-medium bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:text-gray-800 transition-colors duration-200">
                     代課/兼課
                 </button>
             </div>
         </div>
 
         <!-- Stats -->
-        <div class="flex justify-between items-center mb-2 px-1 text-gray-600 text-sm font-medium">
-            <span id="resultCount">資料載入中...</span>
+        <div class="flex justify-between items-center mb-2 px-1 text-gray-600 font-medium">
+            <span id="resultCount" class="text-base">資料載入中...</span>
         </div>
 
         <!-- Table Container -->
-        <div class="bg-white shadow-md rounded-lg overflow-hidden border border-gray-200">
+        <div class="bg-white shadow rounded-lg overflow-hidden border border-gray-200">
             <div class="overflow-x-auto">
                 <table class="min-w-full leading-normal">
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200">
-                            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-32">
+                            <!-- Spacing reduced (py-4), Font kept large -->
+                            <th class="px-6 py-4 text-left text-base font-bold text-gray-600 uppercase tracking-wider w-32">
                                 職稱
                             </th>
-                            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-40">
+                            <th class="px-6 py-4 text-left text-base font-bold text-gray-600 uppercase tracking-wider w-40">
                                 姓名
                             </th>
-                            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                電子郵件信箱 (點擊開啟 Gmail)
+                            <th class="px-6 py-4 text-left text-base font-bold text-gray-600 uppercase tracking-wider">
+                                電子郵件信箱
                             </th>
                         </tr>
                     </thead>
-                    <tbody id="teacherTableBody" class="bg-white">
+                    <tbody id="teacherTableBody" class="bg-white divide-y divide-gray-100">
                         <!-- Rows will be injected here by JavaScript -->
                     </tbody>
                 </table>
             </div>
             
-            <!-- No Results State inside table container -->
+            <!-- No Results State -->
             <div id="noResults" class="hidden flex flex-col items-center justify-center py-12 text-gray-500 bg-white">
-                <i class="fa-regular fa-folder-open text-4xl mb-3 text-gray-300"></i>
-                <p class="text-base">找不到符合的資料</p>
+                <i class="fa-regular fa-folder-open text-5xl mb-3 text-gray-300"></i>
+                <p class="text-lg font-medium text-gray-600">找不到符合的資料</p>
+                <p class="text-base text-gray-400 mt-1">請嘗試調整搜尋關鍵字</p>
             </div>
         </div>
 
@@ -117,13 +130,12 @@
     <!-- Footer -->
     <footer class="bg-gray-800 text-gray-400 py-6 mt-auto border-t border-gray-700">
         <div class="max-w-6xl mx-auto px-4 text-center">
-            <p class="text-sm">© 2025 大溪國中教師查詢系統</p>
+            <p class="text-base font-medium">© 2025 大溪國中教師查詢系統</p>
         </div>
     </footer>
 
     <script>
         // Data parsed from the user's uploaded CSVs
-        // Categories: admin (行政), homeroom (導師), teacher (專任), substitute (代課)
         const teachersData = [
             // --- 行政人員 ---
             { category: 'admin', title: '校長', name: '林晏瑄', email: 'tf51001@dsjh.tyc.edu.tw' },
@@ -212,11 +224,11 @@
             // Update Tab Styles
             tabs.forEach(tab => {
                 if (tab.getAttribute('onclick').includes(category)) {
-                    tab.classList.remove('bg-white', 'text-gray-600', 'hover:bg-gray-100', 'border', 'border-gray-200');
-                    tab.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700', 'shadow-sm');
+                    tab.classList.remove('bg-white', 'text-gray-600', 'hover:bg-gray-50', 'border', 'border-gray-200');
+                    tab.classList.add('bg-blue-600', 'text-white', 'shadow', 'hover:bg-blue-700');
                 } else {
-                    tab.classList.add('bg-white', 'text-gray-600', 'hover:bg-gray-100', 'border', 'border-gray-200');
-                    tab.classList.remove('bg-blue-600', 'text-white', 'hover:bg-blue-700', 'shadow-sm');
+                    tab.classList.add('bg-white', 'text-gray-600', 'hover:bg-gray-50', 'border', 'border-gray-200');
+                    tab.classList.remove('bg-blue-600', 'text-white', 'shadow', 'hover:bg-blue-700');
                 }
             });
 
@@ -247,7 +259,7 @@
             
             if (data.length === 0) {
                 noResults.classList.remove('hidden');
-                resultCount.textContent = '找不到資料';
+                resultCount.textContent = '找不到符合條件的資料';
                 return;
             } else {
                 noResults.classList.add('hidden');
@@ -255,7 +267,7 @@
             }
 
             data.forEach(teacher => {
-                // Determine styling based on category
+                // Reverted badge colors to simpler solid/light style
                 let badgeClass = 'bg-gray-100 text-gray-800';
 
                 if(teacher.category === 'admin') {
@@ -269,26 +281,28 @@
                 }
 
                 // Gmail Compose Link Logic
-                // Opens in a new tab/window using target="_blank"
                 const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${teacher.email}`;
 
                 const row = document.createElement('tr');
-                row.className = 'border-b border-gray-200 hover:bg-gray-50 transition duration-150';
+                // Reduced row hover transition, kept clean border
+                row.className = 'table-row-hover border-b border-gray-100 last:border-b-0 group';
 
                 row.innerHTML = `
-                    <td class="px-5 py-4 whitespace-nowrap">
-                        <span class="${badgeClass} px-2 py-1 text-xs font-semibold rounded-md">
+                    <td class="px-6 py-3.5 whitespace-nowrap">
+                        <!-- Font size kept large (text-sm) -->
+                        <span class="${badgeClass} px-3 py-1.5 text-sm font-semibold rounded-md tracking-wide">
                             ${teacher.title}
                         </span>
                     </td>
-                    <td class="px-5 py-4 whitespace-nowrap">
-                        <div class="text-sm font-bold text-gray-900">${teacher.name}</div>
+                    <td class="px-6 py-3.5 whitespace-nowrap">
+                        <!-- Font size kept large (text-xl) -->
+                        <div class="text-xl font-bold text-gray-800">${teacher.name}</div>
                     </td>
-                    <td class="px-5 py-4 whitespace-nowrap">
-                        <a href="${gmailLink}" target="_blank" rel="noopener noreferrer" class="text-sm text-blue-600 hover:text-blue-800 hover:underline font-mono inline-flex items-center group" title="在新視窗開啟 Gmail 寄信給 ${teacher.name}">
-                            <i class="fa-regular fa-envelope mr-2 text-gray-400 group-hover:text-blue-600"></i>
-                            ${teacher.email}
-                            <i class="fa-solid fa-arrow-up-right-from-square ml-2 text-xs text-gray-400 group-hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                    <td class="px-6 py-3.5 whitespace-nowrap">
+                        <a href="${gmailLink}" target="_blank" rel="noopener noreferrer" class="flex items-center w-fit text-lg text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-all duration-200 group-hover:shadow-sm" title="在新視窗開啟 Gmail 寄信給 ${teacher.name}">
+                            <i class="fa-regular fa-envelope mr-3 text-gray-400 group-hover:text-blue-600 transition-colors"></i>
+                            <span class="font-mono font-medium text-lg">${teacher.email}</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square ml-2 text-sm text-gray-400 opacity-50 group-hover:opacity-100 transition-all transform group-hover:translate-x-0.5"></i>
                         </a>
                     </td>
                 `;
@@ -297,5 +311,4 @@
         }
     </script>
 </body>
-
 </html>

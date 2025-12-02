@@ -14,7 +14,7 @@
     <style>
         body {
             font-family: 'Noto Sans TC', sans-serif;
-            background-color: #f8fafc; /* 回歸較明亮的背景色 */
+            background-color: #f8fafc; /* 明亮背景 */
             color: #1f2937; /* Gray-800 */
         }
         /* Hide scrollbar for tabs */
@@ -36,12 +36,11 @@
 </head>
 <body class="min-h-screen flex flex-col selection:bg-blue-200 selection:text-blue-900">
 
-    <!-- Navbar: Reverted to solid Blue-600 -->
+    <!-- Navbar: Blue-600 -->
     <nav class="bg-blue-600 text-white shadow-md sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-3">
                 <i class="fa-solid fa-school text-2xl"></i>
-                <!-- Font size kept large -->
                 <h1 class="text-2xl font-bold tracking-wide">大溪國中教師通訊錄</h1>
             </div>
         </div>
@@ -52,13 +51,11 @@
         
         <!-- Search Section -->
         <div class="bg-white rounded-xl shadow-sm p-6 mb-6 border border-gray-200">
-            <!-- Font size kept large -->
             <label for="searchInput" class="block text-base font-bold text-gray-700 mb-2 ml-1">快速搜尋</label>
             <div class="relative group">
                 <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <i class="fa-solid fa-magnifying-glass text-lg text-gray-400 group-focus-within:text-blue-500 transition-colors"></i>
                 </div>
-                <!-- Font size kept large -->
                 <input type="text" id="searchInput" 
                     class="block w-full pl-12 pr-4 py-3 bg-white border border-gray-300 rounded-lg leading-5 placeholder-gray-400 text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-lg transition-all duration-200 ease-in-out" 
                     placeholder="輸入姓名、職稱關鍵字 (例如: 林晏瑄, 701, 數學, 主任)...">
@@ -68,8 +65,6 @@
         <!-- Filter Tabs -->
         <div class="mb-6 overflow-x-auto hide-scrollbar pb-2">
             <div class="flex space-x-2 min-w-max px-1" id="categoryTabs">
-                <!-- Reverted to Blue theme buttons -->
-                <!-- Font size kept large (text-base) -->
                 <button onclick="filterCategory('all')" class="tab-btn active px-6 py-2.5 rounded-full text-base font-medium bg-blue-600 text-white shadow hover:bg-blue-700 transition-colors duration-200">
                     全部顯示
                 </button>
@@ -99,7 +94,6 @@
                 <table class="min-w-full leading-normal">
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200">
-                            <!-- Spacing reduced (py-4), Font kept large -->
                             <th class="px-6 py-4 text-left text-base font-bold text-gray-600 uppercase tracking-wider w-32">
                                 職稱
                             </th>
@@ -135,7 +129,7 @@
     </footer>
 
     <script>
-        // Data parsed from the user's uploaded CSVs
+        // 資料來源：使用者提供的完整名冊 (更新於 2025)
         const teachersData = [
             // --- 行政人員 ---
             { category: 'admin', title: '校長', name: '林晏瑄', email: 'tf51001@dsjh.tyc.edu.tw' },
@@ -153,6 +147,24 @@
             { category: 'admin', title: '教務處協行', name: '林文揚', email: 'tf51216@dsjh.tyc.edu.tw' },
             { category: 'admin', title: '訓育組長', name: '蔡之民', email: 'tf51102@dsjh.tyc.edu.tw' },
             { category: 'admin', title: '生教組長', name: '李國釗', email: 'tf51215@dsjh.tyc.edu.tw' },
+            { category: 'admin', title: '體育組長', name: '胡夢凡', email: 'sport@dsjh.tyc.edu.tw' },
+            { category: 'admin', title: '衛生組長', name: '葉穎如', email: 'tf51106@dsjh.tyc.edu.tw' },
+            { category: 'admin', title: '輔導組長', name: '侯玓妤', email: 'tf51109@dsjh.tyc.edu.tw' },
+            { category: 'admin', title: '資料組長', name: '孫凱琳', email: 'tf51159@dsjh.tyc.edu.tw' },
+            { category: 'admin', title: '特教組長', name: '曹淑珍', email: 'tf51199@dsjh.tyc.edu.tw' },
+            { category: 'admin', title: '事務組長', name: '盧小姐', email: 'tf51108@dsjh.tyc.edu.tw' },
+            { category: 'admin', title: '文書組長', name: '徐小姐', email: 'tf51170@dsjh.tyc.edu.tw' },
+            { category: 'admin', title: '出納組長', name: '徐小姐', email: 'tf51200@dsjh.tyc.edu.tw' },
+            { category: 'admin', title: '護理師', name: '黃筑鈴', email: 'tf51231@dsjh.tyc.edu.tw' },
+            { category: 'admin', title: '科技中心主任', name: '甯怡翔', email: 'tf51003@dsjh.tyc.edu.tw' },
+            { category: 'admin', title: '助理', name: '葉思妘', email: 'tf51223@dsjh.tyc.edu.tw' },
+            { category: 'admin', title: '幹事', name: '陳淑惠', email: 'tf51151@dsjh.tyc.edu.tw' },
+            { category: 'admin', title: '幹事', name: '王先生', email: 'tf51210@dsjh.tyc.edu.tw' },
+            { category: 'admin', title: '幹事', name: '吳承翰', email: 'tf51208@dsjh.tyc.edu.tw' },
+            { category: 'admin', title: '幹事', name: '陳偉杰', email: 'tf51213@dsjh.tyc.edu.tw' },
+            { category: 'admin', title: '特教助理員', name: '黃鳳敏', email: 'tf51175@dsjh.tyc.edu.tw' },
+            { category: 'admin', title: '工友', name: '江小姐', email: 'tf51028@dsjh.tyc.edu.tw' },
+            { category: 'admin', title: '工友', name: '方明洲', email: 'tf51214@dsjh.tyc.edu.tw' },
 
             // --- 導師 ---
             { category: 'homeroom', title: '701導師', name: '劉惠珠', email: 'tf51039@dsjh.tyc.edu.tw' },
@@ -166,9 +178,25 @@
             { category: 'homeroom', title: '709導師', name: '陳秋梅', email: 'tf51031@dsjh.tyc.edu.tw' },
             { category: 'homeroom', title: '710導師', name: '蕭安彤', email: 'tf51101@dsjh.tyc.edu.tw' },
             { category: 'homeroom', title: '710導師', name: '簡嘉慧', email: 'tf51206@dsjh.tyc.edu.tw' },
+            
             { category: 'homeroom', title: '801導師', name: '康嘉玲', email: 'tf51140@dsjh.tyc.edu.tw' },
             { category: 'homeroom', title: '802導師', name: '陳建生', email: 'tf51084@dsjh.tyc.edu.tw' },
-            { category: 'homeroom', title: '803導師', name: '劉信志', email: 'tf51000@dsjh.tyc.edu.tw' },
+            { category: 'homeroom', title: '803導師', name: '劉信志', email: 'tf51142@dsjh.tyc.edu.tw' },
+            { category: 'homeroom', title: '804導師', name: '林璟薇', email: 'tf51043@dsjh.tyc.edu.tw' },
+            { category: 'homeroom', title: '805導師', name: '張秀萍', email: 'tf51036@dsjh.tyc.edu.tw' },
+            { category: 'homeroom', title: '806導師', name: '周育秀', email: 'tf51133@dsjh.tyc.edu.tw' },
+            { category: 'homeroom', title: '807導師', name: '文明慧', email: 'tf51055@dsjh.tyc.edu.tw' },
+            { category: 'homeroom', title: '808導師', name: '潘建銘', email: 'tf51051@dsjh.tyc.edu.tw' },
+            { category: 'homeroom', title: '809導師', name: '陳麗芳', email: 'tf51008@dsjh.tyc.edu.tw' },
+            
+            { category: 'homeroom', title: '901導師', name: '徐君萍', email: 'tf51002@dsjh.tyc.edu.tw' },
+            { category: 'homeroom', title: '902導師', name: '吳佳蓉', email: 'tf51153@dsjh.tyc.edu.tw' },
+            { category: 'homeroom', title: '903導師', name: '莊玉如', email: 'tf51126@dsjh.tyc.edu.tw' },
+            { category: 'homeroom', title: '904導師', name: '方廷榕', email: 'tf51132@dsjh.tyc.edu.tw' },
+            { category: 'homeroom', title: '905導師', name: '王宣惠', email: 'tf51112@dsjh.tyc.edu.tw' },
+            { category: 'homeroom', title: '906導師', name: '黃瓘婷', email: 'tf51024@dsjh.tyc.edu.tw' },
+            { category: 'homeroom', title: '907導師', name: '邱顯徽', email: 'tf51092@dsjh.tyc.edu.tw' },
+            { category: 'homeroom', title: '908導師', name: '林堯仁', email: 'tf51041@dsjh.tyc.edu.tw' },
 
             // --- 專任教師 ---
             { category: 'teacher', title: '專任教師', name: '邱采薇', email: 'tf51176@dsjh.tyc.edu.tw' },
@@ -186,6 +214,12 @@
             { category: 'teacher', title: '專任教師', name: '余婉如', email: 'tf51095@dsjh.tyc.edu.tw' },
             { category: 'teacher', title: '教練', name: '鄭偉廷', email: 'weiting@dsjh.tyc.edu.tw' },
             { category: 'teacher', title: '教練', name: '王竣禾', email: 'tf51185@dsjh.tyc.edu.tw' },
+            { category: 'teacher', title: '教練', name: '蕭韻茹', email: 'tf51202@dsjh.tyc.edu.tw' },
+            { category: 'teacher', title: '教練', name: '何春德', email: 'tf51226@dsjh.tyc.edu.tw' },
+            { category: 'teacher', title: '專任輔導教師', name: '鄭涵文', email: 'tf51179@dsjh.tyc.edu.tw' },
+            { category: 'teacher', title: '專位輔導教師', name: '鄒蜀美', email: 'tf51187@dsjh.tyc.edu.tw' },
+            { category: 'teacher', title: '專任(借調)', name: '張致信', email: 'tf51009@dsjh.tyc.edu.tw' },
+            { category: 'teacher', title: '專任(借調)', name: '盧仁茂', email: 'tf51211@dsjh.tyc.edu.tw' },
 
             // --- 代課/兼課 ---
             { category: 'substitute', title: '代理教師', name: '李雅婷', email: 'tf51197@dsjh.tyc.edu.tw' },
@@ -202,7 +236,8 @@
             { category: 'substitute', title: '兼課教師', name: '盧和璟', email: 'tf51225@dsjh.tyc.edu.tw' },
             { category: 'substitute', title: '兼課教師', name: '黃慶興', email: 'tf51042@dsjh.tyc.edu.tw' },
             { category: 'substitute', title: '兼課教師', name: '廖惠如', email: 'tf51217@dsjh.tyc.edu.tw' },
-            { category: 'substitute', title: '兼課教師', name: '郭鴻銘', email: 'tf51219@dsjh.tyc.edu.tw' }
+            { category: 'substitute', title: '兼課教師', name: '郭鴻銘', email: 'tf51219@dsjh.tyc.edu.tw' },
+            { category: 'substitute', title: '兼課教師', name: '何昶毅', email: 'tf51232@dsjh.tyc.edu.tw' }
         ];
 
         let currentCategory = 'all';
@@ -281,21 +316,20 @@
                 }
 
                 // Gmail Compose Link Logic
-                const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${teacher.email}`;
+                // If email is pending, still create a link but maybe to generic page or just empty
+                const emailToUse = teacher.email === '待確認' ? '' : teacher.email;
+                const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${emailToUse}`;
 
                 const row = document.createElement('tr');
-                // Reduced row hover transition, kept clean border
                 row.className = 'table-row-hover border-b border-gray-100 last:border-b-0 group';
 
                 row.innerHTML = `
                     <td class="px-6 py-3.5 whitespace-nowrap">
-                        <!-- Font size kept large (text-sm) -->
                         <span class="${badgeClass} px-3 py-1.5 text-sm font-semibold rounded-md tracking-wide">
                             ${teacher.title}
                         </span>
                     </td>
                     <td class="px-6 py-3.5 whitespace-nowrap">
-                        <!-- Font size kept large (text-xl) -->
                         <div class="text-xl font-bold text-gray-800">${teacher.name}</div>
                     </td>
                     <td class="px-6 py-3.5 whitespace-nowrap">

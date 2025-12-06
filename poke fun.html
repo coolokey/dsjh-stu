@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>段考戰士の奇蹟福袋 (管理版)</title>
+    <!-- 引入 SortableJS -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <style>
+        /* --- Google Fonts --- */
+        @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@700&display=swap');
+
+        /* --- 整體樣式 --- */
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f5f5dc;
+            color: #333;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background-color: #d9534f;
+            padding: 15px;
+            border-radius: 10px;
+            border: 3px solid #c9302c;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            margin: 20px auto;
+        }
+        
+        .game-header {
+            background-color: #5cb85c;
+            border: 5px solid #f0ad4e;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            color: #fff;
+            text-shadow: 3px 3px #4cae4c;
+            font-size: 3rem;
+            margin: 0 0 5px 0;
+        }
+        
+        p { display: none; }
+        
+        .prize-info {
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            text-shadow: 1px 1px #000;
+        }
+
+        .controls {
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #f0ad4e;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .controls span {
+            font-weight: bold;
+            color: #d9534f;
+        }
+
+        .controls input[type="number"] {
+            padding: 8px;
+            border-radius: 5px;
+            border: 2px solid #d9534f;
+            font-family: inherit;
+            font-size: 1rem;
+            width: 70px;
+            text-align: center;
+        }
+
+        .controls button {
+            padding: 8px 18px;
+            border: none;
+            background-color: #d9534f;
+            color: white;
+            font-family: 'Noto Sans TC', sans-serif;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            box-shadow: 0 4px #c9302c;
+        }
+
+        .controls button:hover {
+            background-color: #c9302c;
+        }
+
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+            margin: 0;
+            max-height: 55vh;
+            overflow-y: auto;
+            padding: 15px;
+            background-color: #c9302c;
+            border-radius: 5px;
+        }
+
+        .hole {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background-color: #337ab7;
+            border-radius: 5px;
+            border: 2px solid white;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
+            padding: 5px;
+        }
+        
+        .hole .thumb-icon {
+            width: 80%;
+            height: 80%;
+            fill: #d9534f;
+        }
+
+        .hole:not(.opened):hover {
+            transform: scale(1.08);
+            animation: shake 0.5s infinite alternate;
+        }
+        
+        @keyframes shake {
+            from { transform: rotate(-5deg) scale(1.08); }
+            to { transform: rotate(5deg) scale(1.08); }
+        }
+
+        .hole.opened {
+            opacity: 1;
+            color: #333;
+            cursor: not-allowed;
+            pointer-events: none;
+            font-size: 1rem;
+            font-weight: bold;
+            padding: 5px;
+            line-height: 1.2;
+            overflow-wrap: break-word;
+            border: 2px solid #f0ad4e;
+        }
+
+        .hole.opened.special { background-color: #d9534f; color: white; border-color: #c9302c; animation: special-glow 1.5s infinite alternate; }
+        .hole.opened.good { background-color: #337ab7; color: white; border-color: #2e6da4; }
+        .hole.opened.normal { background-color: #ffffff; color: #333; border-color: #ccc; }
+        .hole.opened.bad { background-color: #5cb85c; color: white; border-color: #4cae4c; }
+        
+        @keyframes special-glow {
+            from { box-shadow: 0 0 10px #ffeb3b, 0 0 20px #ffc107; }
+            to { box-shadow: 0 0 20px #ffeb3b, 0 0 30px #ffc107; }
+        }
+
+        #result-display {
+            margin-top: 15px;
+            padding: 10px 15px;
+            border-radius: 5px;
+            border: 3px dashed #5cb85c;
+            font-size: 1.5rem;
+            font-weight: bold;
+            transition: all 0.5s ease;
+            min-height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #fff;
+            color: #d9534f;
+        }
+        
+        #result-display.special { background: linear-gradient(45deg, #ffc107, #ffeb3b); color: #c9302c; border-color: #ff9800; }
+        #result-display.good, #result-display.bad, #result-display.normal { background-color: #fff; }
+
+
+        /* --- 後台管理 CSS --- */
+        #settingsBtn {
+            position: fixed; top: 20px; right: 20px; z-index: 1000;
+            background: #007bff; color: white; border: none; padding: 10px 15px;
+            border-radius: 5px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            font-family: sans-serif;
+        }
+        #settingsBtn:hover { background: #0056b3; }
+
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); display: none; align-items: center;
+            justify-content: center; z-index: 3000;
+        }
+        .modal-content {
+            background: white; padding: 20px; border-radius: 10px;
+            width: 90%; max-width: 900px; max-height: 90vh;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3); overflow: auto;
+            font-family: Arial, sans-serif; text-align: left;
+        }
+        .modal-content h2, .modal-content h3 { margin-top: 0; color: #333; }
+        .modal-content label { display: block; margin: 10px 0 5px; }
+        .modal-content input[type="password"], 
+        .modal-content input[type="text"], 
+        .modal-content input[type="number"], 
+        .modal-content textarea {
+            width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc;
+            border-radius: 5px; box-sizing: border-box; font-size: 1rem;
+        }
+        .modal-content button {
+            background: #007bff; color: white; border: none; padding: 10px 15px;
+            border-radius: 5px; cursor: pointer; margin-right: 10px;
+        }
+        .modal-content button:hover { background: #0056b3; }
+        .settings-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width:768px) { .settings-container { grid-template-columns: 1fr; } }
+        
+        .sort-list-container { max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; background: #f8f9fa; border-radius: 5px; }
+        .sort-item {
+            display: flex; align-items: center; padding: 8px; margin-bottom: 5px;
+            background: #fff; border: 1px solid #ddd; border-radius: 5px; cursor: grab;
+        }
+        .sort-item span { font-size: 16px; color: #333; word-break: break-all; }
+        .sort-item .order-number { font-weight: bold; margin-right: 10px; color: #007bff; }
+        .sort-item .prize-type-badge {
+            padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.8em; margin-right: 10px;
+        }
+        .prize-type-badge.special { background-color: #d9534f; }
+        .prize-type-badge.good { background-color: #337ab7; }
+        .prize-type-badge.normal { background-color: #ffffff; color: #333; border: 1px solid #ccc; }
+        .prize-type-badge.bad { background-color: #5cb85c; }
+        
+        .sound-setting-item { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
+        .sound-setting-item input[type="text"] { flex-grow: 1; margin-bottom: 0; }
+        .sound-setting-item button { flex-shrink: 0; padding: 8px 12px; font-size: 0.9em; background-color: #6c757d; margin-right: 0; }
+        .switch-label { display: flex; align-items: center; gap: 5px; font-size: 0.9em; color: #333; margin: 0; cursor: pointer; }
+
+        .weight-setting-item { display:flex; align-items:center; gap: 10px; margin-bottom: 5px; }
+        .weight-setting-item label { flex-basis: 120px; margin: 0; }
+        .weight-setting-item input { max-width: 100px; }
+        
+        #audio-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); color: white;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 2000; cursor: pointer; transition: opacity 0.5s ease;
+        }
+        .overlay-text {
+            font-size: 2rem; text-align: center; padding: 20px;
+            border: 2px solid white; border-radius: 15px; text-shadow: 2px 2px #000;
+        }
+        
+        .footer {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            color: #ffffff;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 5px 15px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 99;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="audio-overlay">
+        <div class="overlay-text">點擊螢幕<br>啟用音效並開始遊戲</div>
+    </div>
+    
+    <button id="settingsBtn" type="button">⚙ 設定</button>
+
+    <div class="container">
+        <div class="game-header">
+            <h1 id="main-title-display">奇蹟戳戳樂</h1>
+            <div id="sub-title-display" class="prize-info">祝您中大獎！</div>
+        </div>
+
+        <div class="controls">
+            <span>戳洞數量:</span>
+            <input type="number" id="hole-count" value="40" min="1" max="200">
+            <button id="start-button" type="button">開始戳洞</button>
+        </div>
+
+        <div id="game-board"></div>
+        <div id="result-display">看看你抽中了什麼！</div>
+    </div>
+
+    <div class="footer">Game Coded by Yu-Mao-Men & Gemini</div>
+
+    <!-- 設定模式 Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div id="password-section">
+                <h2>請輸入密碼</h2>
+                <label for="passwordInput">密碼:</label>
+                <input type="password" id="passwordInput" placeholder="請輸入密碼">
+                <div style="text-align:right;">
+                    <button id="passwordSubmit" type="button">確認</button>
+                    <button id="passwordCancel" type="button">取消</button>
+                </div>
+            </div>
+            <div id="settings-section" style="display:none;">
+                <h2>設定</h2>
+                <div class="settings-container">
+                    <div>
+                        <h3>標題設定</h3>
+                        <label for="titleInput">主標題:</label>
+                        <input type="text" id="titleInput">
+                        <label for="subtitleInput">副標題:</label>
+                        <input type="text" id="subtitleInput">
+                        <hr style="margin: 20px 0;">
+
+                        <h3>密碼管理</h3>
+                        <label for="currentPasswordInput">目前密碼:</label>
+                        <input type="password" id="currentPasswordInput" placeholder="請輸入目前密碼">
+                        <label for="newPasswordInput">新密碼:</label>
+                        <input type="password" id="newPasswordInput" placeholder="請輸入新密碼">
+                        <label for="confirmPasswordInput">確認新密碼:</label>
+                        <input type="password" id="confirmPasswordInput" placeholder="再次輸入新密碼">
+                        <button id="changePasswordBtn" type="button">更改密碼</button>
+                        <hr style="margin: 20px 0;">
+
+                        <h3>新增獎品 (每行一筆)</h3>
+                        <label for="specialPrizesText">人生勝利組 (特獎)</label>
+                        <textarea id="specialPrizesText" rows="2" placeholder="直接保送理想大學！"></textarea>
+                        <label for="goodPrizesText">大吉大利 (好獎)</label>
+                        <textarea id="goodPrizesText" rows="3" placeholder="神蹟降臨！明天宣佈放假一天！"></textarea>
+                        <label for="normalPrizesText">平平無奇 (普通獎)</label>
+                        <textarea id="normalPrizesText" rows="3" placeholder="找到上學期不見的橡皮擦。"></textarea>
+                        <label for="badPrizesText">衰神附體 (壞獎)</label>
+                        <textarea id="badPrizesText" rows="3" placeholder="明天突擊小考！"></textarea>
+                        <button id="addPrizesBtn" type="button">新增以上獎品</button>
+                        <hr style="margin: 20px 0;">
+                        <h3>機率設定 (權重)</h3>
+                        <p style="display:block; font-size:0.9em; color:#555;">數字越大，抽中該類獎項的機率越高。</p>
+                        <div class="weight-setting-item">
+                            <label for="specialPrizeWeight">人生勝利組 (特獎):</label>
+                            <input type="number" id="specialPrizeWeight" value="5" min="0">
+                        </div>
+                        <div class="weight-setting-item">
+                            <label for="goodPrizeWeight">大吉大利 (好獎):</label>
+                            <input type="number" id="goodPrizeWeight" value="15" min="0">
+                        </div>
+                        <div class="weight-setting-item">
+                            <label for="normalPrizeWeight">平平無奇 (普通獎):</label>
+                            <input type="number" id="normalPrizeWeight" value="50" min="0">
+                        </div>
+                        <div class="weight-setting-item">
+                            <label for="badPrizeWeight">衰神附體 (壞獎):</label>
+                            <input type="number" id="badPrizeWeight" value="30" min="0">
+                        </div>
+                        <hr style="margin: 20px 0;">
+                        <h3>音效設定</h3>
+                        <div class="sound-setting-item">
+                            <label for="specialSoundUrl" style="flex-basis: 100px;">特獎音效:</label>
+                            <input type="text" id="specialSoundUrl">
+                            <button class="listen-btn" data-target="specialSoundUrl" type="button">試聽</button>
+                            <label class="switch-label"><input type="checkbox" id="enableSpecialSound">啟用</label>
+                        </div>
+                        <div class="sound-setting-item">
+                            <label for="goodSoundUrl" style="flex-basis: 100px;">好獎音效:</label>
+                            <input type="text" id="goodSoundUrl">
+                            <button class="listen-btn" data-target="goodSoundUrl" type="button">試聽</button>
+                            <label class="switch-label"><input type="checkbox" id="enableGoodSound">啟用</label>
+                        </div>
+                        <div class="sound-setting-item">
+                            <label for="normalSoundUrl" style="flex-basis: 100px;">普通獎音效:</label>
+                            <input type="text" id="normalSoundUrl">
+                            <button class="listen-btn" data-target="normalSoundUrl" type="button">試聽</button>
+                            <label class="switch-label"><input type="checkbox" id="enableNormalSound">啟用</label>
+                        </div>
+                         <div class="sound-setting-item">
+                            <label for="badSoundUrl" style="flex-basis: 100px;">壞獎音效:</label>
+                            <input type="text" id="badSoundUrl">
+                            <button class="listen-btn" data-target="badSoundUrl" type="button">試聽</button>
+                            <label class="switch-label"><input type="checkbox" id="enableBadSound">啟用</label>
+                        </div>
+                         <div class="sound-setting-item">
+                            <label for="punchSoundUrl" style="flex-basis: 100px;">戳洞音效:</label>
+                            <input type="text" id="punchSoundUrl">
+                            <button class="listen-btn" data-target="punchSoundUrl" type="button">試聽</button>
+                            <label class="switch-label"><input type="checkbox" id="enablePunchSound">啟用</label>
+                        </div>
+                        <div class="sound-setting-item">
+                            <label for="bgmUrl" style="flex-basis: 100px;">背景音樂:</label>
+                            <input type="text" id="bgmUrl">
+                            <button class="listen-btn" data-target="bgmUrl" type="button">試聽</button>
+                            <label class="switch-label"><input type="checkbox" id="enableBgm">啟用</label>
+                        </div>
+                    </div>
+                    <div>
+                        <h2>獎品清單與排序</h2>
+                        <div id="sortList" class="sort-list-container"></div>
+                        <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 5px;">
+                            <button id="applySortBtn" type="button">套用排序</button>
+                            <button id="clearAllBtn" type="button" style="background-color: #E74C3C;">🗑️ 清空所有獎品</button>
+                            <button id="resetDefaultsBtn" type="button" style="background-color: #795548;">↺ 重設為預設值</button>
+                        </div>
+                        <hr style="margin: 20px 0;">
+                        <div style="margin-top:20px;">
+                            <h3>資料管理</h3>
+                            <button id="exportBtn" type="button">匯出JSON</button>
+                            <button id="importBtn" type="button">匯入JSON</button>
+                            <input type="file" id="importFileInput" accept=".json" style="display:none">
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align:right; margin-top:20px;">
+                    <button id="closeSettingsBtn" type="button" style="background-color:#6c757d;">關閉 (儲存設定)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 全域變數 ---
+        let prizesData = []; 
+        let mainTitle = '奇蹟戳戳樂';
+        let subTitle = '祝您中大獎！';
+        let adminPassword = '12345678';
+        let soundUrls = {
+            special: 'https://coolokey.synology.me/registration/modules/tad_uploader/index.php?op=dlfile&cfsn=770&cat_sn=87&name=%E4%B8%AD%E7%8D%8E.mp3',
+            good: 'https://coolokey.synology.me/registration/modules/tad_uploader/index.php?op=dlfile&cfsn=770&cat_sn=87&name=%E4%B8%AD%E7%8D%8E.mp3',
+            normal: 'https://coolokey.synology.me/registration/modules/tad_uploader/index.php?op=dlfile&cfsn=770&cat_sn=87&name=%E4%B8%AD%E7%8D%8E.mp3',
+            bad: 'https://coolokey.synology.me/registration/modules/tad_uploader/index.php?op=dlfile&cfsn=771&cat_sn=87&name=%E6%9C%AA%E4%B8%AD%E7%8D%8E.mp3',
+            punch: 'https://coolokey.synology.me/registration/modules/tad_uploader/index.php?op=dlfile&cfsn=768&cat_sn=87&name=hit-soundvideo-game-type-230510.mp3',
+            bgm: 'https://coolokey.synology.me/registration/modules/tad_uploader/index.php?op=dlfile&cfsn=769&cat_sn=87&name=%E8%83%8C%E6%99%AF.mp3'
+        };
+        let soundEnabled = {
+            special: false, good: false, normal: false, bad: false, punch: false, bgm: false
+        };
+        let prizeWeights = {
+            special: 5, good: 15, normal: 50, bad: 30
+        };
+
+        // --- 音效物件 ---
+        let specialSound, goodSound, normalSound, badSound, punchSound, bgm;
+
+        // --- 初始化 (使用最穩定的 window.onload 確保元素存在) ---
+        window.addEventListener('load', () => {
+            loadAllData();
+            initializeAudio();
+            updateTitles();
+            generateGame();
+            setupStaticEventListeners(); // *** 綁定靜態按鈕 ***
+            
+            // 初始化 Sortable
+            const sortList = document.getElementById('sortList');
+            if(sortList) new Sortable(sortList, { animation: 150 });
+            
+            // 全域事件委派 (只針對動態產生的刪除按鈕)
+            document.addEventListener('click', function(e) {
+                const target = e.target;
+                if (target && target.classList.contains('delete-prize-btn')) {
+                    const idToDelete = target.getAttribute('data-id');
+                    prizesData = prizesData.filter(p => String(p.id) !== String(idToDelete));
+                    updateSortList();
+                }
+            });
+        });
+
+        // --- *** 關鍵修正：直接綁定靜態按鈕事件 *** ---
+        function setupStaticEventListeners() {
+            // 清空所有獎品 (使用 onclick 直接覆蓋，最穩定)
+            const clearBtn = document.getElementById('clearAllBtn');
+            if (clearBtn) {
+                clearBtn.onclick = function(e) {
+                    e.preventDefault(); // 防止任何可能的預設行為
+                    if (confirm('【警告】確定要清空所有獎品嗎？\n此操作會將目前所有獎品移除。')) {
+                        prizesData = []; // 清空資料
+                        updateSortList(); // 更新清單介面
+                        saveAllData(); // 立即存檔
+                        alert('已清空所有獎品！');
+                    }
+                };
+            }
+
+            // 套用排序
+            const applySortBtn = document.getElementById('applySortBtn');
+            if (applySortBtn) {
+                applySortBtn.onclick = function(e) {
+                    e.preventDefault();
+                    const newOrder = [];
+                    const sortList = document.getElementById('sortList');
+                    sortList.querySelectorAll('.sort-item').forEach(item => {
+                        const id = item.getAttribute('data-id');
+                        const prize = prizesData.find(p => String(p.id) === String(id));
+                        if (prize) newOrder.push(prize);
+                    });
+                    prizesData = newOrder;
+                    updateSortList();
+                    saveAllData();
+                    alert("排序已套用並儲存！");
+                };
+            }
+
+            // 重設預設值
+            const resetBtn = document.getElementById('resetDefaultsBtn');
+            if (resetBtn) {
+                resetBtn.onclick = function(e) {
+                    e.preventDefault();
+                    if (confirm('確定要捨棄目前設定，恢復成原廠預設值嗎？')) {
+                        localStorage.removeItem('戳戳樂_Data');
+                        initDefaultPrizes();
+                        updateSortList();
+                        saveAllData();
+                        alert('已恢復預設值！');
+                    }
+                };
+            }
+
+            // 音效試聽按鈕
+            document.querySelectorAll('.listen-btn').forEach(button => {
+                button.onclick = function(e) {
+                    const targetInputId = e.currentTarget.dataset.target;
+                    const input = document.getElementById(targetInputId);
+                    const url = input.value.trim();
+                    if (url) {
+                        const testSound = new Audio(url);
+                        testSound.play().catch(() => alert('播放失敗，請檢查連結。'));
+                    } else {
+                        alert('請輸入音效連結！');
+                    }
+                };
+            });
+            
+            // 開始按鈕
+            const startBtn = document.getElementById('start-button');
+            if(startBtn) startBtn.onclick = generateGame;
+
+            // 設定按鈕
+            const setBtn = document.getElementById('settingsBtn');
+            if(setBtn) {
+                setBtn.onclick = function() {
+                    document.getElementById('modal').style.display = 'flex';
+                    document.getElementById('password-section').style.display = 'block';
+                    document.getElementById('settings-section').style.display = 'none';
+                    document.getElementById('passwordInput').value = '';
+                    document.getElementById('passwordInput').focus();
+                };
+            }
+            
+            // 密碼確認
+            const passSubmit = document.getElementById('passwordSubmit');
+            if(passSubmit) {
+                passSubmit.onclick = function() {
+                    const inputVal = document.getElementById('passwordInput').value;
+                    if (inputVal === adminPassword) {
+                        document.getElementById('password-section').style.display = 'none';
+                        document.getElementById('settings-section').style.display = 'block';
+                        loadSettingsToUI();
+                    } else {
+                        alert("密碼錯誤");
+                    }
+                };
+            }
+            
+            // 密碼取消
+            const passCancel = document.getElementById('passwordCancel');
+            if(passCancel) passCancel.onclick = function() { document.getElementById('modal').style.display = 'none'; };
+
+            // 關閉並儲存
+            const closeSetBtn = document.getElementById('closeSettingsBtn');
+            if(closeSetBtn) {
+                closeSetBtn.onclick = function() {
+                    // 讀取值回變數
+                    mainTitle = document.getElementById('titleInput').value.trim() || '奇蹟戳戳樂';
+                    subTitle = document.getElementById('subtitleInput').value.trim() || '祝您中大獎！';
+                    
+                    soundUrls.special = document.getElementById('specialSoundUrl').value.trim();
+                    soundUrls.good = document.getElementById('goodSoundUrl').value.trim();
+                    soundUrls.normal = document.getElementById('normalSoundUrl').value.trim();
+                    soundUrls.bad = document.getElementById('badSoundUrl').value.trim();
+                    soundUrls.punch = document.getElementById('punchSoundUrl').value.trim();
+                    soundUrls.bgm = document.getElementById('bgmUrl').value.trim();
+                    
+                    soundEnabled.special = document.getElementById('enableSpecialSound').checked;
+                    soundEnabled.good = document.getElementById('enableGoodSound').checked;
+                    soundEnabled.normal = document.getElementById('enableNormalSound').checked;
+                    soundEnabled.bad = document.getElementById('enableBadSound').checked;
+                    soundEnabled.punch = document.getElementById('enablePunchSound').checked;
+                    soundEnabled.bgm = document.getElementById('enableBgm').checked;
+
+                    prizeWeights.special = parseInt(document.getElementById('specialPrizeWeight').value, 10) || 0;
+                    prizeWeights.good = parseInt(document.getElementById('goodPrizeWeight').value, 10) || 0;
+                    prizeWeights.normal = parseInt(document.getElementById('normalPrizeWeight').value, 10) || 0;
+                    prizeWeights.bad = parseInt(document.getElementById('badPrizeWeight').value, 10) || 0;
+
+                    updateTitles();
+                    initializeAudio();
+                    saveAllData();
+                    
+                    if (soundEnabled.bgm) {
+                        if (bgm.paused && document.getElementById('audio-overlay').style.display === 'none') {
+                            bgm.play().catch(e => console.error("背景音樂播放失敗:", e));
+                        }
+                    } else {
+                        bgm.pause();
+                        bgm.currentTime = 0;
+                    }
+
+                    document.getElementById('modal').style.display = 'none';
+                    generateGame(); 
+                    alert('設定已儲存！');
+                };
+            }
+            
+            // 新增獎品
+            const addPrizeBtn = document.getElementById('addPrizesBtn');
+            if(addPrizeBtn) {
+                addPrizeBtn.onclick = function() {
+                    const processText = (id, type) => {
+                        const el = document.getElementById(id);
+                        const lines = el.value.split('\n').map(t => t.trim()).filter(Boolean);
+                        lines.forEach(content => {
+                            prizesData.push({ id: Date.now() + Math.random(), content, type });
+                        });
+                        el.value = '';
+                    };
+                    
+                    processText('specialPrizesText', 'special');
+                    processText('goodPrizesText', 'good');
+                    processText('normalPrizesText', 'normal');
+                    processText('badPrizesText', 'bad');
+                    
+                    updateSortList();
+                    saveAllData();
+                    alert('獎品已新增！');
+                };
+            }
+            
+            // 更改密碼
+            const changePassBtn = document.getElementById('changePasswordBtn');
+            if(changePassBtn) {
+                changePassBtn.onclick = function() {
+                    const currentPass = document.getElementById('currentPasswordInput').value;
+                    const newPass = document.getElementById('newPasswordInput').value;
+                    const confirmPass = document.getElementById('confirmPasswordInput').value;
+
+                    if (currentPass !== adminPassword) { alert('目前密碼不正確！'); return; }
+                    if (!newPass || !confirmPass) { alert('新密碼欄位不可為空！'); return; }
+                    if (newPass !== confirmPass) { alert('密碼不相符！'); return; }
+
+                    adminPassword = newPass;
+                    saveAllData();
+                    alert('密碼已更改！');
+                    document.getElementById('currentPasswordInput').value = '';
+                    document.getElementById('newPasswordInput').value = '';
+                    document.getElementById('confirmPasswordInput').value = '';
+                };
+            }
+
+            // 匯出
+            const exportBtn = document.getElementById('exportBtn');
+            if(exportBtn) {
+                exportBtn.onclick = function() {
+                    saveAllData(); 
+                    const dataStr = localStorage.getItem('戳戳樂_Data');
+                    const blob = new Blob([dataStr], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = '戳戳樂_完整設定.json';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                };
+            }
+
+            // 匯入按鈕
+            const importBtn = document.getElementById('importBtn');
+            if(importBtn) importBtn.onclick = () => document.getElementById('importFileInput').click();
+            
+            // 匯入動作
+            const importFile = document.getElementById('importFileInput');
+            if(importFile) {
+                importFile.onchange = function(e) {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        try {
+                            const data = JSON.parse(event.target.result);
+                            if (!data.prizes) throw new Error("Invalid format");
+                            localStorage.setItem('戳戳樂_Data', JSON.stringify(data));
+                            loadAllData();
+                            generateGame();
+                            alert('設定匯入成功！');
+                        } catch (error) {
+                            alert('匯入失敗，檔案格式錯誤！');
+                        }
+                    };
+                    reader.readAsText(file);
+                    e.target.value = '';
+                };
+            }
+        }
+
+
+        // --- 資料存取邏輯 ---
+        function saveAllData() {
+            const dataToSave = {
+                prizes: prizesData,
+                mainTitle, subTitle, soundUrls, soundEnabled, prizeWeights, adminPassword
+            };
+            localStorage.setItem('戳戳樂_Data', JSON.stringify(dataToSave));
+        }
+
+        function loadAllData() {
+            const savedData = localStorage.getItem('戳戳樂_Data');
+            if (savedData) {
+                try {
+                    const data = JSON.parse(savedData);
+                    if (data.prizes) prizesData = data.prizes; // 即使是空陣列也會正確載入
+                    if (data.mainTitle) mainTitle = data.mainTitle;
+                    if (data.subTitle) subTitle = data.subTitle;
+                    if (data.soundUrls) soundUrls = data.soundUrls;
+                    if (data.soundEnabled) soundEnabled = data.soundEnabled;
+                    if (data.prizeWeights) prizeWeights = data.prizeWeights;
+                    if (data.adminPassword) adminPassword = data.adminPassword;
+                } catch (e) {
+                    console.error("讀取存檔失敗，使用預設值");
+                    initDefaultPrizes();
+                }
+            } else {
+                initDefaultPrizes();
+            }
+            updateSortList();
+        }
+
+        function initDefaultPrizes() {
+            prizesData = [
+              { id: Date.now() + '0', content: "人生逆轉！直接保送理想大學！", type: "special" },
+              { id: Date.now() + '1', content: "神蹟降臨！明天宣佈放假一天！", type: "good" },
+              { id: Date.now() + '2', content: "老師眼花，多給你 10 分！", type: "good" },
+              { id: Date.now() + '3', content: "福利社阿姨今天心情好，飯糰加量不加價。", type: "normal" },
+              { id: Date.now() + '4', content: "下堂體育課，老師說自由活動。", type: "normal" },
+              { id: Date.now() + '5', content: "恭喜！獲得『罰寫課文十遍』兌換券一張。", type: "bad" },
+              { id: Date.now() + '6', content: "老師在你背後，他很火，但他不說。", type: "bad" }
+            ];
+        }
+
+        function initializeAudio() {
+            if (!specialSound) specialSound = new Audio(soundUrls.special);
+            if (!goodSound) goodSound = new Audio(soundUrls.good);
+            if (!normalSound) normalSound = new Audio(soundUrls.normal);
+            if (!badSound) badSound = new Audio(soundUrls.bad);
+            if (!punchSound) punchSound = new Audio(soundUrls.punch);
+            if (!bgm) {
+                bgm = new Audio(soundUrls.bgm);
+                bgm.loop = true;
+            }
+            specialSound.src = soundUrls.special;
+            goodSound.src = soundUrls.good;
+            normalSound.src = soundUrls.normal;
+            badSound.src = soundUrls.bad;
+            punchSound.src = soundUrls.punch;
+            bgm.src = soundUrls.bgm;
+        }
+
+        function updateTitles() {
+            document.getElementById('main-title-display').textContent = mainTitle;
+            document.getElementById('sub-title-display').textContent = subTitle;
+            document.title = mainTitle; 
+        }
+
+        const audioOverlay = document.getElementById('audio-overlay');
+        audioOverlay.addEventListener('click', () => {
+            bgm.volume = 0.3;
+            if (soundEnabled.bgm) {
+                bgm.play().catch(e => console.error("背景音樂播放失敗:", e));
+            }
+            audioOverlay.style.opacity = '0';
+            setTimeout(() => { audioOverlay.style.display = 'none'; }, 500);
+        }, { once: true });
+
+        // 載入設定到 UI
+        function loadSettingsToUI() {
+            document.getElementById('titleInput').value = mainTitle;
+            document.getElementById('subtitleInput').value = subTitle;
+            document.getElementById('specialSoundUrl').value = soundUrls.special;
+            document.getElementById('goodSoundUrl').value = soundUrls.good;
+            document.getElementById('normalSoundUrl').value = soundUrls.normal;
+            document.getElementById('badSoundUrl').value = soundUrls.bad;
+            document.getElementById('punchSoundUrl').value = soundUrls.punch;
+            document.getElementById('bgmUrl').value = soundUrls.bgm;
+            document.getElementById('enableSpecialSound').checked = soundEnabled.special;
+            document.getElementById('enableGoodSound').checked = soundEnabled.good;
+            document.getElementById('enableNormalSound').checked = soundEnabled.normal;
+            document.getElementById('enableBadSound').checked = soundEnabled.bad;
+            document.getElementById('enablePunchSound').checked = soundEnabled.punch;
+            document.getElementById('enableBgm').checked = soundEnabled.bgm;
+            document.getElementById('specialPrizeWeight').value = prizeWeights.special;
+            document.getElementById('goodPrizeWeight').value = prizeWeights.good;
+            document.getElementById('normalPrizeWeight').value = prizeWeights.normal;
+            document.getElementById('badPrizeWeight').value = prizeWeights.bad;
+            updateSortList();
+        }
+
+        function updateSortList() {
+            const sortList = document.getElementById('sortList');
+            sortList.innerHTML = '';
+            prizesData.forEach((prize, idx) => {
+                const item = document.createElement('div');
+                item.className = 'sort-item';
+                item.setAttribute('data-id', prize.id);
+                
+                let badgeText = '';
+                switch(prize.type) {
+                    case 'special': badgeText = '特'; break;
+                    case 'good': badgeText = '吉'; break;
+                    case 'normal': badgeText = '普'; break;
+                    case 'bad': badgeText = '凶'; break;
+                }
+
+                item.innerHTML = `
+                    <span class="order-number">${idx + 1}.</span>
+                    <span class="prize-type-badge ${prize.type}">${badgeText}</span>
+                    <span>${prize.content.length > 20 ? prize.content.substr(0, 20) + '...' : prize.content}</span>
+                    <span class="delete-prize-btn" data-id="${prize.id}" style="margin-left:auto; cursor:pointer;">❌</span>
+                `;
+                sortList.appendChild(item);
+            });
+        }
+
+        function generateGame() {
+            const gameBoard = document.getElementById('game-board');
+            const resultDisplay = document.getElementById('result-display');
+            const holeCountInput = document.getElementById('hole-count');
+            
+            gameBoard.innerHTML = '';
+            resultDisplay.textContent = '看看你抽中了什麼！';
+            resultDisplay.className = '';
+
+            if (prizesData.length === 0) {
+                gameBoard.innerHTML = '<p style="grid-column: 1 / -1; color: white; font-size: 1.2rem; display:block;">沒有任何獎品！請點擊右上角 ⚙ 設定來新增獎品。</p>';
+                return;
+            }
+
+            const holeCount = parseInt(holeCountInput.value, 10);
+            if (isNaN(holeCount) || holeCount <= 0) return;
+            
+            const specialPrizes = prizesData.filter(p => p.type === 'special');
+            const goodPrizes = prizesData.filter(p => p.type === 'good');
+            const normalPrizes = prizesData.filter(p => p.type === 'normal');
+            const badPrizes = prizesData.filter(p => p.type === 'bad');
+            
+            const weightedPool = [];
+            if (specialPrizes.length > 0) for (let i = 0; i < prizeWeights.special; i++) weightedPool.push('special');
+            if (goodPrizes.length > 0) for (let i = 0; i < prizeWeights.good; i++) weightedPool.push('good');
+            if (normalPrizes.length > 0) for (let i = 0; i < prizeWeights.normal; i++) weightedPool.push('normal');
+            if (badPrizes.length > 0) for (let i = 0; i < prizeWeights.bad; i++) weightedPool.push('bad');
+
+            if (weightedPool.length === 0) {
+                 gameBoard.innerHTML = '<p style="grid-column: 1 / -1; color: white; font-size: 1.2rem; display:block;">目前權重設定下沒有可抽的獎品，請檢查設定。</p>';
+                return;
+            }
+
+            for (let i = 0; i < holeCount; i++) {
+                const hole = document.createElement('div');
+                hole.classList.add('hole');
+
+                const selectedType = weightedPool[Math.floor(Math.random() * weightedPool.length)];
+                let prizeList = [];
+                if (selectedType === 'special') prizeList = specialPrizes;
+                else if (selectedType === 'good') prizeList = goodPrizes;
+                else if (selectedType === 'normal') prizeList = normalPrizes;
+                else if (selectedType === 'bad') prizeList = badPrizes;
+                
+                const prize = prizeList[Math.floor(Math.random() * prizeList.length)];
+                
+                hole.dataset.prizeText = prize.content;
+                hole.dataset.prizeType = prize.type;
+                
+                hole.innerHTML = `<svg class="thumb-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21.3,10.211H15.862V2.553a2.528,2.528,0,0,0-2.528-2.528H12.3A2.528,2.528,0,0,0,9.769,2.553V4.215L6.15,10.739a3.79,3.79,0,0,0-1.138,2.7V21.42a2.528,2.528,0,0,0,2.528,2.528H18.776a2.527,2.527,0,0,0,2.51-2.243l.813-7.317A2.528,2.528,0,0,0,21.3,10.211Z M5.012,11.589a2.528,2.528,0,0,0,0,5.056H2.528a2.528,2.528,0,0,0,0-5.056Z"/></svg>`;
+
+                hole.addEventListener('click', handleHoleClick);
+                gameBoard.appendChild(hole);
+            }
+        }
+
+        function handleHoleClick(event) {
+            const hole = event.currentTarget;
+            if (hole.classList.contains('opened')) return;
+
+            const prizeText = hole.dataset.prizeText;
+            const prizeType = hole.dataset.prizeType;
+            
+            hole.classList.add('opened', prizeType);
+            const resultDisplay = document.getElementById('result-display');
+
+            if (soundEnabled.punch) {
+                punchSound.currentTime = 0;
+                punchSound.play().catch(e => console.log("音效錯誤"));
+            }
+
+            resultDisplay.className = prizeType;
+            resultDisplay.textContent = prizeText;
+            
+            let soundToPlay;
+            if (prizeType === 'special' && soundEnabled.special) soundToPlay = specialSound;
+            else if (prizeType === 'good' && soundEnabled.good) soundToPlay = goodSound;
+            else if (prizeType === 'normal' && soundEnabled.normal) soundToPlay = normalSound;
+            else if (prizeType === 'bad' && soundEnabled.bad) soundToPlay = badSound;
+            
+            if (soundToPlay) {
+                soundToPlay.currentTime = 0;
+                soundToPlay.play().catch(e => console.log("音效錯誤"));
+            }
+            
+            hole.innerHTML = '';
+            hole.textContent = prizeText;
+        }
+    </script>
+</body>
+</html>

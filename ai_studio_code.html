@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D 粒子手勢互動特效</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            font-family: sans-serif;
+        }
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        /* 隱藏原始影片元素，我們只需要數據 */
+        #video-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0; 
+            pointer-events: none;
+            z-index: 0;
+        }
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #0ff;
+            font-size: 24px;
+            z-index: 10;
+            pointer-events: none;
+            text-align: center;
+            text-shadow: 0 0 10px #0ff;
+        }
+    </style>
+    
+    <!-- Import Maps for Three.js -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    
+    <!-- MediaPipe Hands & Camera Utils -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <div id="loading">系統初始化中...<br><span style="font-size:14px">請允許攝影機權限並稍候</span></div>
+    <video id="video-input"></video>
+    <div id="canvas-container"></div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+        import GUI from 'three/addons/libs/lil-gui.module.min.js';
+
+        // --- 全域變數設定 ---
+        const PARTICLE_COUNT = 4000;
+        const PARTICLE_SIZE = 0.15;
+        const INTERACTION_RADIUS = 5.0; // 手部互動半徑
+        const sceneConfig = {
+            shape: 'Sphere',
+            color: '#00ffff',
+            bloomStrength: 1.5,
+            bloomRadius: 0.4,
+            bloomThreshold: 0
+        };
+
+        // --- Three.js 初始化 ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        // 添加一點霧氣增加深邃感
+        scene.fog = new THREE.FogExp2(0x000000, 0.02);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 15;
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        container.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 0.5;
+
+        // --- Post Processing (Bloom 發光特效) ---
+        const renderScene = new RenderPass(scene, camera);
+        const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+        bloomPass.threshold = sceneConfig.bloomThreshold;
+        bloomPass.strength = sceneConfig.bloomStrength;
+        bloomPass.radius = sceneConfig.bloomRadius;
+
+        const composer = new EffectComposer(renderer);
+        composer.addPass(renderScene);
+        composer.addPass(bloomPass);
+
+        // --- 粒子系統 ---
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(PARTICLE_COUNT * 3);
+        const targetPositions = new Float32Array(PARTICLE_COUNT * 3); // 目標形狀位置
+        const originalPositions = new Float32Array(PARTICLE_COUNT * 3); // 當前形狀的基準位置
+        
+        // 初始化為球體
+        calculateSpherePositions(targetPositions);
+        // 複製到當前位置
+        for(let i=0; i<positions.length; i++) {
+            positions[i] = targetPositions[i];
+            originalPositions[i] = targetPositions[i];
+        }
+
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+        const material = new THREE.PointsMaterial({
+            color: new THREE.Color(sceneConfig.color),
+            size: PARTICLE_SIZE,
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });
+
+        const particles = new THREE.Points(geometry, material);
+        scene.add(particles);
+
+        // --- 形狀計算函數 ---
+        function calculateSpherePositions(array) {
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                const radius = 6 * Math.cbrt(Math.random()); // 分佈均勻
+                const theta = Math.random() * 2 * Math.PI;
+                const phi = Math.acos(2 * Math.random() - 1);
+                
+                const x = radius * Math.sin(phi) * Math.cos(theta);
+                const y = radius * Math.sin(phi) * Math.sin(theta);
+                const z = radius * Math.cos(phi);
+
+                array[i * 3] = x;
+                array[i * 3 + 1] = y;
+                array[i * 3 + 2] = z;
+            }
+        }
+
+        function calculateCubePositions(array) {
+            const size = 8;
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                array[i * 3] = (Math.random() - 0.5) * size;
+                array[i * 3 + 1] = (Math.random() - 0.5) * size;
+                array[i * 3 + 2] = (Math.random() - 0.5) * size;
+            }
+        }
+
+        function calculateSaturnPositions(array) {
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                // 70% 粒子在環上，30% 在本體
+                if (Math.random() > 0.3) {
+                    // Ring
+                    const angle = Math.random() * Math.PI * 2;
+                    // 環的半徑範圍 5 ~ 9
+                    const radius = 5 + Math.random() * 4; 
+                    array[i * 3] = Math.cos(angle) * radius;
+                    array[i * 3 + 1] = (Math.random() - 0.5) * 0.2; // 環很薄
+                    array[i * 3 + 2] = Math.sin(angle) * radius;
+                } else {
+                    // Planet Body
+                    const radius = 2.5 * Math.cbrt(Math.random());
+                    const theta = Math.random() * 2 * Math.PI;
+                    const phi = Math.acos(2 * Math.random() - 1);
+                    array[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+                    array[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+                    array[i * 3 + 2] = radius * Math.cos(phi);
+                }
+            }
+        }
+
+        // --- UI 控制 ---
+        const gui = new GUI();
+        
+        gui.add(sceneConfig, 'shape', ['Sphere', 'Saturn', 'Cube']).name('形狀').onChange(changeShape);
+        
+        gui.addColor(sceneConfig, 'color').name('發光顏色').onChange((val) => {
+            material.color.set(val);
+        });
+
+        const bloomFolder = gui.addFolder('視覺風格 (Bloom)');
+        bloomFolder.add(sceneConfig, 'bloomStrength', 0, 3).onChange(v => bloomPass.strength = v);
+        bloomFolder.add(sceneConfig, 'bloomRadius', 0, 1).onChange(v => bloomPass.radius = v);
+        
+        function changeShape(shape) {
+            if (shape === 'Sphere') calculateSpherePositions(targetPositions);
+            if (shape === 'Cube') calculateCubePositions(targetPositions);
+            if (shape === 'Saturn') calculateSaturnPositions(targetPositions);
+        }
+
+        // --- 手部追蹤變數 ---
+        let handPosition = new THREE.Vector3(1000, 1000, 1000); // 初始在遠處
+        let isPinching = false;
+        let lastPinchState = false;
+
+        // --- MediaPipe Hands 設定 ---
+        const videoElement = document.getElementById('video-input');
+        
+        function onResults(results) {
+            document.getElementById('loading').style.display = 'none';
+
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                const landmarks = results.multiHandLandmarks[0];
+                
+                // 1. 取得手掌中心 (大約在 Index Base 和 Pinky Base 之間，這裡簡化取 Index Base)
+                // MediaPipe 座標: x, y 為 [0, 1]，左上角為(0,0)。Three.js 中心為 (0,0,0)
+                // 需注意 WebGL 座標與 Canvas 鏡像問題
+                
+                // 掌心 (Landmark 9)
+                const palmX = (1 - landmarks[9].x) * 20 - 10; // Map 0..1 to -10..10
+                const palmY = -(landmarks[9].y * 20 - 10);    // Invert Y
+                // Z 軸透過 Landmark 的 z (相對深度) 來模擬，但 Webcam 只有 2D，MediaPipe 給出的 z 是相對 wrist 的
+                // 這裡我們簡化，假設手在 z=0 附近移動，或者用 landmarks[9].z * 10
+                const palmZ = 0; // 簡化為平面互動效果較好控制
+
+                handPosition.set(palmX, palmY, palmZ);
+
+                // 2. 偵測捏合 (Thumb tip 4 與 Index tip 8 的距離)
+                const thumbTip = landmarks[4];
+                const indexTip = landmarks[8];
+                const distance = Math.hypot(thumbTip.x - indexTip.x, thumbTip.y - indexTip.y);
+
+                if (distance < 0.05) {
+                    isPinching = true;
+                } else {
+                    isPinching = false;
+                }
+            } else {
+                // 沒有偵測到手，移開互動點
+                handPosition.set(1000, 1000, 1000);
+                isPinching = false;
+            }
+        }
+
+        const hands = new Hands({locateFile: (file) => {
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+        }});
+
+        hands.setOptions({
+            maxNumHands: 1,
+            modelComplexity: 1,
+            minDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5
+        });
+
+        hands.onResults(onResults);
+
+        const cameraUtils = new Camera(videoElement, {
+            onFrame: async () => {
+                await hands.send({image: videoElement});
+            },
+            width: 640,
+            height: 480
+        });
+        cameraUtils.start();
+
+        // --- 動畫迴圈 ---
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const delta = clock.getDelta();
+            const time = clock.getElapsedTime();
+
+            // 1. 處理形狀變換 (Lerp originalPositions towards targetPositions)
+            // 這讓粒子慢慢移動到新形狀的基準點
+            for (let i = 0; i < PARTICLE_COUNT * 3; i++) {
+                originalPositions[i] += (targetPositions[i] - originalPositions[i]) * 2.0 * delta;
+            }
+
+            // 2. 處理互動與物理
+            const positionsArray = particles.geometry.attributes.position.array;
+            
+            // 捏合事件觸發顏色改變 (Debounce)
+            if (isPinching && !lastPinchState) {
+                const randomColor = new THREE.Color().setHSL(Math.random(), 1, 0.5);
+                material.color.set(randomColor);
+                sceneConfig.color = '#' + randomColor.getHexString();
+                // 同步 GUI
+                // Note: lil-gui updateDisplay is manual usually or bound to object
+            }
+            lastPinchState = isPinching;
+
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                const ix = i * 3;
+                const iy = i * 3 + 1;
+                const iz = i * 3 + 2;
+
+                // 獲取基準位置（當前形狀下的理想位置）
+                const ox = originalPositions[ix];
+                const oy = originalPositions[iy];
+                const oz = originalPositions[iz];
+
+                // 獲取目前粒子位置
+                let px = positionsArray[ix];
+                let py = positionsArray[iy];
+                let pz = positionsArray[iz];
+
+                // 計算手部排斥力
+                const dx = px - handPosition.x;
+                const dy = py - handPosition.y;
+                const dz = pz - handPosition.z;
+                const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+
+                // 物理邏輯：
+                // 每個粒子都想回到 originalPosition (彈簧力)
+                // 如果手靠近，會被推開 (排斥力)
+                
+                let vx = (ox - px) * 2.0 * delta; // 回歸力
+                let vy = (oy - py) * 2.0 * delta;
+                let vz = (oz - pz) * 2.0 * delta;
+
+                if (dist < INTERACTION_RADIUS) {
+                    const force = (INTERACTION_RADIUS - dist) / INTERACTION_RADIUS;
+                    const repulsionFactor = 15.0 * delta; // 排斥強度
+                    
+                    vx += (dx / dist) * force * repulsionFactor;
+                    vy += (dy / dist) * force * repulsionFactor;
+                    vz += (dz / dist) * force * repulsionFactor;
+                    
+                    // 手指捏合時，不僅改顏色，還會產生吸引效果 (可選特效)
+                    if (isPinching) {
+                        vx -= (dx / dist) * force * repulsionFactor * 1.5; // 反轉為吸引
+                        vy -= (dy / dist) * force * repulsionFactor * 1.5;
+                        vz -= (dz / dist) * force * repulsionFactor * 1.5;
+                    }
+                }
+
+                // 添加一點隨機波動 (Noise) 讓它看起來像活的
+                vx += Math.sin(time * 2 + py) * 0.02 * delta;
+                vy += Math.cos(time * 1.5 + px) * 0.02 * delta;
+
+                positionsArray[ix] += vx;
+                positionsArray[iy] += vy;
+                positionsArray[iz] += vz;
+            }
+
+            particles.geometry.attributes.position.needsUpdate = true;
+
+            controls.update();
+            composer.render();
+        }
+
+        animate();
+
+        // --- 視窗縮放處理 ---
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+    </script>
+</body>
+</html>

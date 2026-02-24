@@ -3021,6 +3021,16 @@
   },
   {
     "year": "8",
+    "class": "3",
+    "seat": "34",
+    "id": "1130260",
+    "name": "王芷藜",
+    "email": "f511130260@dsjh.tyc.edu.tw",
+    "scratch": "f511130260",
+    "learn": "TYCDS1130260"
+  },
+  {
+    "year": "8",
     "class": "4",
     "seat": "1",
     "id": "1130086",
@@ -6524,7 +6534,7 @@
     "class": "7",
     "seat": "27",
     "id": "1120186",
-    "name": "陳宜楷",
+    "name": "徐薇容",
     "email": "f511120186@dsjh.tyc.edu.tw",
     "scratch": "f511120186",
     "learn": "TYCDS1120186"

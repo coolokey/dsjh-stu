@@ -131,112 +131,601 @@
     <script>
         // 資料來源：使用者提供的完整名冊 (更新於 2025)
         const teachersData = [
-            // --- 行政人員 ---
-            { category: 'admin', title: '校長', name: '林晏瑄', email: 'tf51001@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '教務主任', name: '韓美瑛', email: 'tf51125@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '學務主任', name: '鄭舒文', email: 'tf51104@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '總務主任', name: '黃文昌', email: 'tf51130@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '輔導主任', name: '游家興', email: 'tf51117@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '會計主任', name: '陳古學', email: 'tf51235@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '人事主任', name: '吳玉珍', email: 'tf51212@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '教學組長', name: '李昱瑩', email: 'tf51227@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '註冊組長', name: '游貿仁', email: 'tf51149@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '設備組長', name: '吳美青', email: 'tf51060@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '資訊組長', name: '林耀明', email: 'mis@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '教務處協行', name: '林佳均', email: 'tf51182@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '教務處協行', name: '林文揚', email: 'tf51216@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '訓育組長', name: '蔡之民', email: 'tf51102@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '生教組長', name: '李國釗', email: 'tf51215@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '體育組長', name: '胡夢凡', email: 'sport@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '衛生組長', name: '葉穎如', email: 'tf51106@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '輔導組長', name: '侯玓妤', email: 'tf51109@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '資料組長', name: '孫凱琳', email: 'tf51159@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '特教組長', name: '曹淑珍', email: 'tf51199@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '事務組長', name: '盧小姐', email: 'tf51108@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '文書組長', name: '徐小姐', email: 'tf51170@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '出納組長', name: '王先生', email: 'tf51210@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '護理師', name: '黃筑鈴', email: 'tf51231@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '科技中心主任', name: '甯怡翔', email: 'tf51003@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '助理', name: '葉思妘', email: 'tf51223@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '幹事', name: '陳淑惠', email: 'tf51151@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '幹事', name: '吳承翰', email: 'tf51208@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '幹事', name: '陳偉杰', email: 'tf51213@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '特教助理員', name: '黃鳳敏', email: 'tf51175@dsjh.tyc.edu.tw' },
-            { category: 'admin', title: '工友', name: '方先生', email: 'tf51214@dsjh.tyc.edu.tw' },
-
-            // --- 導師 ---
-            { category: 'homeroom', title: '701導師', name: '劉惠珠', email: 'tf51039@dsjh.tyc.edu.tw' },
-            { category: 'homeroom', title: '702導師', name: '羅培瑛', email: 'tf51138@dsjh.tyc.edu.tw' },
-            { category: 'homeroom', title: '703導師', name: '陳惠晶', email: 'tf51035@dsjh.tyc.edu.tw' },
-            { category: 'homeroom', title: '704導師', name: '張一梅', email: 'tf51135@dsjh.tyc.edu.tw' },
-            { category: 'homeroom', title: '705導師', name: '蔡淑禎', email: 'tf51057@dsjh.tyc.edu.tw' },
-            { category: 'homeroom', title: '706導師', name: '鍾宛均', email: 'tf51155@dsjh.tyc.edu.tw' },
-            { category: 'homeroom', title: '707導師', name: '謝如琳', email: 'tf51134@dsjh.tyc.edu.tw' },
-            { category: 'homeroom', title: '708導師', name: '陳毅宏', email: 'tf51073@dsjh.tyc.edu.tw' },
-            { category: 'homeroom', title: '709導師', name: '陳秋梅', email: 'tf51031@dsjh.tyc.edu.tw' },
-            { category: 'homeroom', title: '710導師', name: '蕭安彤', email: 'tf51101@dsjh.tyc.edu.tw' },
-            { category: 'homeroom', title: '710導師', name: '簡嘉慧', email: 'tf51206@dsjh.tyc.edu.tw' },
-            
-            { category: 'homeroom', title: '801導師', name: '康嘉玲', email: 'tf51140@dsjh.tyc.edu.tw' },
-            { category: 'homeroom', title: '802導師', name: '陳建生', email: 'tf51084@dsjh.tyc.edu.tw' },
-            { category: 'homeroom', title: '803導師', name: '劉信志', email: 'tf51142@dsjh.tyc.edu.tw' },
-            { category: 'homeroom', title: '804導師', name: '林璟薇', email: 'tf51043@dsjh.tyc.edu.tw' },
-            { category: 'homeroom', title: '805導師', name: '張秀萍', email: 'tf51036@dsjh.tyc.edu.tw' },
-            { category: 'homeroom', title: '806導師', name: '周育秀', email: 'tf51133@dsjh.tyc.edu.tw' },
-            { category: 'homeroom', title: '807導師', name: '文明慧', email: 'tf51055@dsjh.tyc.edu.tw' },
-            { category: 'homeroom', title: '808導師', name: '潘建銘', email: 'tf51051@dsjh.tyc.edu.tw' },
-            { category: 'homeroom', title: '809導師', name: '陳麗芳', email: 'tf51008@dsjh.tyc.edu.tw' },
-            
-            { category: 'homeroom', title: '901導師', name: '徐君萍', email: 'tf51002@dsjh.tyc.edu.tw' },
-            { category: 'homeroom', title: '902導師', name: '吳佳蓉', email: 'tf51153@dsjh.tyc.edu.tw' },
-            { category: 'homeroom', title: '903導師', name: '莊玉如', email: 'tf51126@dsjh.tyc.edu.tw' },
-            { category: 'homeroom', title: '904導師', name: '方廷榕', email: 'tf51132@dsjh.tyc.edu.tw' },
-            { category: 'homeroom', title: '905導師', name: '王宣惠', email: 'tf51112@dsjh.tyc.edu.tw' },
-            { category: 'homeroom', title: '906導師', name: '黃瓘婷', email: 'tf51024@dsjh.tyc.edu.tw' },
-            { category: 'homeroom', title: '907導師', name: '邱顯徽', email: 'tf51092@dsjh.tyc.edu.tw' },
-            { category: 'homeroom', title: '908導師', name: '林堯仁', email: 'tf51041@dsjh.tyc.edu.tw' },
-
-            // --- 專任教師 ---
-            { category: 'teacher', title: '專任教師', name: '邱采薇', email: 'tf51176@dsjh.tyc.edu.tw' },
-            { category: 'teacher', title: '專任教師', name: '王明貴', email: 'tf51011@dsjh.tyc.edu.tw' },
-            { category: 'teacher', title: '專任教師', name: '張銘峰', email: 'tf51154@dsjh.tyc.edu.tw' },
-            { category: 'teacher', title: '專任教師', name: '邱芷君', email: 'tf51201@dsjh.tyc.edu.tw' },
-            { category: 'teacher', title: '專任教師', name: '張雅琪', email: 'tf51056@dsjh.tyc.edu.tw' },
-            { category: 'teacher', title: '專任教師', name: '李俊毅', email: 'tf51032@dsjh.tyc.edu.tw' },
-            { category: 'teacher', title: '專任教師', name: '吳嘉祥', email: 'tf51115@dsjh.tyc.edu.tw' },
-            { category: 'teacher', title: '專任教師', name: '蘇慧姍', email: 'tf51111@dsjh.tyc.edu.tw' },
-            { category: 'teacher', title: '專任教師', name: '蘇彥如', email: 'tf51075@dsjh.tyc.edu.tw' },
-            { category: 'teacher', title: '專任教師', name: '陳小鈴', email: 'tf51027@dsjh.tyc.edu.tw' },
-            { category: 'teacher', title: '專任教師', name: '張佳慧', email: 'tf51058@dsjh.tyc.edu.tw' },
-            { category: 'teacher', title: '專任教師', name: '游敬廉', email: 'tf51076@dsjh.tyc.edu.tw' },
-            { category: 'teacher', title: '專任教師', name: '余婉如', email: 'tf51095@dsjh.tyc.edu.tw' },
-            { category: 'teacher', title: '教練', name: '鄭偉廷', email: 'weiting@dsjh.tyc.edu.tw' },
-            { category: 'teacher', title: '教練', name: '王竣禾', email: 'tf51185@dsjh.tyc.edu.tw' },
-            { category: 'teacher', title: '教練', name: '蕭韻茹', email: 'tf51202@dsjh.tyc.edu.tw' },
-            { category: 'teacher', title: '教練', name: '何春德', email: 'tf51226@dsjh.tyc.edu.tw' },
-            { category: 'teacher', title: '專任輔導教師', name: '鄭涵文', email: 'tf51179@dsjh.tyc.edu.tw' },
-            { category: 'teacher', title: '專位輔導教師', name: '鄒蜀美', email: 'tf51187@dsjh.tyc.edu.tw' },
-            { category: 'teacher', title: '專任(借調)', name: '張致信', email: 'tf51009@dsjh.tyc.edu.tw' },
-            { category: 'teacher', title: '專任(借調)', name: '盧仁茂', email: 'tf51211@dsjh.tyc.edu.tw' },
-
-            // --- 代課/兼課 ---
-            { category: 'substitute', title: '代理教師', name: '李雅婷', email: 'tf51197@dsjh.tyc.edu.tw' },
-            { category: 'substitute', title: '代理教師', name: '邱昀', email: 'tf51224@dsjh.tyc.edu.tw' },
-            { category: 'substitute', title: '代理教師', name: '葉思寒', email: 'tf51220@dsjh.tyc.edu.tw' },
-            { category: 'substitute', title: '代理教師', name: '許晏聆', email: 'tf51228@dsjh.tyc.edu.tw' },
-            { category: 'substitute', title: '代理教師', name: '許書銘', email: 'tf51229@dsjh.tyc.edu.tw' },
-            { category: 'substitute', title: '代理教師', name: '古柏宏', email: 'tf51230@dsjh.tyc.edu.tw' },
-            { category: 'substitute', title: '兼課教師', name: '于克勤', email: 'tf51078@dsjh.tyc.edu.tw' },
-            { category: 'substitute', title: '兼課教師', name: '余喜宴', email: 'melody@dsjh.tyc.edu.tw' },
-            { category: 'substitute', title: '兼課教師', name: '蔡斐琳', email: 'tf51158@dsjh.tyc.edu.tw' },
-            { category: 'substitute', title: '兼課教師', name: '周文德', email: 'wende@dsjh.tyc.edu.tw' },
-            { category: 'substitute', title: '兼課教師', name: '方嘉雯', email: 'tf51204@dsjh.tyc.edu.tw' },
-            { category: 'substitute', title: '兼課教師', name: '盧和璟', email: 'tf51225@dsjh.tyc.edu.tw' },
-            { category: 'substitute', title: '兼課教師', name: '黃慶興', email: 'tf51042@dsjh.tyc.edu.tw' },
-            { category: 'substitute', title: '兼課教師', name: '廖惠如', email: 'tf51217@dsjh.tyc.edu.tw' },
-            { category: 'substitute', title: '兼課教師', name: '郭鴻銘', email: 'tf51219@dsjh.tyc.edu.tw' },
-            { category: 'substitute', title: '兼課教師', name: '何昶毅', email: 'tf51232@dsjh.tyc.edu.tw' }
-        ];
+            {
+                        "category": "admin",
+                        "title": "校長",
+                        "name": "林晏瑄",
+                        "email": "tf51001@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "教務主任",
+                        "name": "張致信",
+                        "email": "tf51009@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "學務主任",
+                        "name": "鄭舒文",
+                        "email": "tf51104@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "總務主任",
+                        "name": "張智鈞",
+                        "email": "tf51238@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "輔導主任",
+                        "name": "游家興",
+                        "email": "tf51117@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "會計主任",
+                        "name": "陳古學",
+                        "email": "tf51235@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "人事主任",
+                        "name": "吳玉珍",
+                        "email": "tf51212@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "教學組長",
+                        "name": "李昱瑩",
+                        "email": "tf51227@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "註冊組長",
+                        "name": "游貿仁",
+                        "email": "tf51149@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "設備組長",
+                        "name": "吳美青",
+                        "email": "tf51060@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "資訊組長",
+                        "name": "林耀明",
+                        "email": "mis@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "科技中心主任",
+                        "name": "甯怡翔",
+                        "email": "tf51003@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "訓育組長",
+                        "name": "蔡之民",
+                        "email": "tf51102@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "生教組長",
+                        "name": "李國釗",
+                        "email": "tf51215@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "衛生組長",
+                        "name": "葉穎如",
+                        "email": "tf51106@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "體育組長",
+                        "name": "胡夢凡",
+                        "email": "sport@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "輔導組長",
+                        "name": "侯玓妤",
+                        "email": "tf51109@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "資料組長",
+                        "name": "孫凱琳",
+                        "email": "tf51159@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "特教組長",
+                        "name": "曹淑珍",
+                        "email": "tf51199@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "事務組長",
+                        "name": "盧小姐",
+                        "email": "tf51108@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "文書組長",
+                        "name": "徐小姐",
+                        "email": "tf51170@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "出納組長",
+                        "name": "王浩宇",
+                        "email": "tf51210@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "護理師",
+                        "name": "黃筑鈴",
+                        "email": "tf51231@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "科技中心助理",
+                        "name": "葉思妘",
+                        "email": "tf51223@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "幹事",
+                        "name": "陳淑惠",
+                        "email": "tf51151@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "幹事",
+                        "name": "吳承翰",
+                        "email": "tf51208@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "幹事",
+                        "name": "陳偉杰",
+                        "email": "tf51213@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "幹事",
+                        "name": "李純寬",
+                        "email": "tf51243@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "特教助理員",
+                        "name": "黃鳳敏",
+                        "email": "tf51175@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "特教助理員",
+                        "name": "陳家惠",
+                        "email": "tf51244@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "admin",
+                        "title": "工友",
+                        "name": "方先生",
+                        "email": "tf51214@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "homeroom",
+                        "title": "701導師",
+                        "name": "張雅琪",
+                        "email": "tf51056@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "homeroom",
+                        "title": "702導師",
+                        "name": "李俊毅",
+                        "email": "tf51032@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "homeroom",
+                        "title": "703導師",
+                        "name": "王明貴",
+                        "email": "tf51011@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "homeroom",
+                        "title": "704導師",
+                        "name": "王宣惠",
+                        "email": "tf51112@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "homeroom",
+                        "title": "705導師",
+                        "name": "陳小鈴",
+                        "email": "tf51027@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "homeroom",
+                        "title": "706導師",
+                        "name": "武道協卡",
+                        "email": "tf51237@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "homeroom",
+                        "title": "707導師",
+                        "name": "張銘峰",
+                        "email": "tf51154@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "homeroom",
+                        "title": "708導師",
+                        "name": "韓美瑛",
+                        "email": "tf51125@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "homeroom",
+                        "title": "709導師",
+                        "name": "吳嘉祥",
+                        "email": "tf51115@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "homeroom",
+                        "title": "710導師",
+                        "name": "塗美文",
+                        "email": "tf51241@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "homeroom",
+                        "title": "710導師",
+                        "name": "游敬廉",
+                        "email": "tf51076@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "homeroom",
+                        "title": "801導師",
+                        "name": "劉惠珠",
+                        "email": "tf51039@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "homeroom",
+                        "title": "802導師",
+                        "name": "羅培瑛",
+                        "email": "tf51138@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "homeroom",
+                        "title": "803導師",
+                        "name": "陳惠晶",
+                        "email": "tf51035@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "homeroom",
+                        "title": "804導師",
+                        "name": "張一梅",
+                        "email": "tf51135@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "homeroom",
+                        "title": "805導師",
+                        "name": "蔡淑禎",
+                        "email": "tf51057@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "homeroom",
+                        "title": "806導師",
+                        "name": "黃文昌",
+                        "email": "tf51130@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "homeroom",
+                        "title": "807導師",
+                        "name": "謝如琳",
+                        "email": "tf51134@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "homeroom",
+                        "title": "808導師",
+                        "name": "陳毅宏",
+                        "email": "tf51073@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "homeroom",
+                        "title": "809導師",
+                        "name": "陳秋梅",
+                        "email": "tf51031@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "homeroom",
+                        "title": "901導師",
+                        "name": "康嘉玲",
+                        "email": "tf51140@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "homeroom",
+                        "title": "902導師",
+                        "name": "陳建生",
+                        "email": "tf51084@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "homeroom",
+                        "title": "903導師",
+                        "name": "劉信志",
+                        "email": "tf51142@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "homeroom",
+                        "title": "904導師",
+                        "name": "林璟薇",
+                        "email": "tf51043@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "homeroom",
+                        "title": "905導師",
+                        "name": "張秀萍",
+                        "email": "tf51036@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "homeroom",
+                        "title": "906導師",
+                        "name": "周育秀",
+                        "email": "tf51133@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "homeroom",
+                        "title": "907導師",
+                        "name": "文明慧",
+                        "email": "tf51055@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "homeroom",
+                        "title": "908導師",
+                        "name": "潘建銘",
+                        "email": "tf51051@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "homeroom",
+                        "title": "909導師",
+                        "name": "陳麗芳",
+                        "email": "tf51008@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "teacher",
+                        "title": "專任教師",
+                        "name": "徐君萍",
+                        "email": "tf51002@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "teacher",
+                        "title": "專任教師",
+                        "name": "林堯仁",
+                        "email": "tf51041@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "teacher",
+                        "title": "專任教師",
+                        "name": "邱顯徽",
+                        "email": "tf51092@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "teacher",
+                        "title": "專任教師",
+                        "name": "莊玉如",
+                        "email": "tf51126@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "teacher",
+                        "title": "專任教師",
+                        "name": "方廷榕",
+                        "email": "tf51132@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "teacher",
+                        "title": "專任教師",
+                        "name": "徐恩禹",
+                        "email": "tf51242@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "teacher",
+                        "title": "專任教師",
+                        "name": "邱采薇",
+                        "email": "tf51176@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "teacher",
+                        "title": "專任教師",
+                        "name": "蘇彥如",
+                        "email": "tf51075@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "teacher",
+                        "title": "專任教師",
+                        "name": "余婉如",
+                        "email": "tf51095@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "teacher",
+                        "title": "專任教師",
+                        "name": "蘇慧姍",
+                        "email": "tf51111@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "teacher",
+                        "title": "專任教師",
+                        "name": "吳佳蓉",
+                        "email": "tf51153@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "teacher",
+                        "title": "專任教師",
+                        "name": "邱芷君",
+                        "email": "tf51201@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "teacher",
+                        "title": "專任教師",
+                        "name": "蕭安彤",
+                        "email": "tf51101@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "teacher",
+                        "title": "專任教師",
+                        "name": "簡嘉慧",
+                        "email": "tf51206@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "teacher",
+                        "title": "專任教師",
+                        "name": "黃瓘婷",
+                        "email": "tf51024@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "teacher",
+                        "title": "教務處協行",
+                        "name": "林佳均",
+                        "email": "tf51182@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "teacher",
+                        "title": "教練",
+                        "name": "王竣禾",
+                        "email": "tf51185@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "teacher",
+                        "title": "教練",
+                        "name": "蕭韻茹",
+                        "email": "tf51202@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "teacher",
+                        "title": "教練",
+                        "name": "何春德",
+                        "email": "tf51226@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "teacher",
+                        "title": "專任輔導教師",
+                        "name": "鄭涵文",
+                        "email": "tf51179@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "teacher",
+                        "title": "專位輔導教師",
+                        "name": "鄒蜀美",
+                        "email": "tf51187@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "substitute",
+                        "title": "代理教師",
+                        "name": "許碧芳",
+                        "email": "tf51239@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "substitute",
+                        "title": "代理教師",
+                        "name": "唐芸",
+                        "email": "tf51240@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "substitute",
+                        "title": "代理教師",
+                        "name": "李雅婷",
+                        "email": "tf51197@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "substitute",
+                        "title": "代理教師",
+                        "name": "邱昀",
+                        "email": "tf51224@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "substitute",
+                        "title": "代理教師",
+                        "name": "葉思寒",
+                        "email": "tf51220@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "substitute",
+                        "title": "代理教師",
+                        "name": "許晏聆",
+                        "email": "tf51228@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "substitute",
+                        "title": "代理教師",
+                        "name": "許書銘",
+                        "email": "tf51229@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "substitute",
+                        "title": "代理教師",
+                        "name": "古柏宏",
+                        "email": "tf51230@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "substitute",
+                        "title": "兼課教師",
+                        "name": "余喜宴",
+                        "email": "melody@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "substitute",
+                        "title": "兼課教師",
+                        "name": "黃慶興",
+                        "email": "tf51042@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "substitute",
+                        "title": "兼課教師",
+                        "name": "于克勤",
+                        "email": "tf51078@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "substitute",
+                        "title": "兼課教師",
+                        "name": "蔡斐琳",
+                        "email": "tf51158@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "substitute",
+                        "title": "兼課教師",
+                        "name": "方嘉雯",
+                        "email": "tf51204@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "substitute",
+                        "title": "兼課教師",
+                        "name": "盧和璟",
+                        "email": "tf51225@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "substitute",
+                        "title": "兼課教師",
+                        "name": "周文德",
+                        "email": "wende@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "substitute",
+                        "title": "兼課教師",
+                        "name": "廖惠如",
+                        "email": "tf51217@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "substitute",
+                        "title": "兼課教師",
+                        "name": "郭鴻銘",
+                        "email": "tf51219@dsjh.tyc.edu.tw"
+            },
+            {
+                        "category": "substitute",
+                        "title": "兼課教師",
+                        "name": "何昶毅",
+                        "email": "tf51232@dsjh.tyc.edu.tw"
+            }
+];
 
         let currentCategory = 'all';
 

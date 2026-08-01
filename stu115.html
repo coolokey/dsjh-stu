@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>學生個人資訊查詢系統 - 115學年度</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body { font-family: "Microsoft JhengHei", "Heiti TC", sans-serif; background-color: #f9fafb; }
+      
+      .loader {
+        border: 3px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 3px solid #2563eb;
+        width: 24px;
+        height: 24px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+        vertical-align: middle;
+      }
+      @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+      
+      #init-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(255,255,255,0.98); z-index: 50;
+        display: flex; justify-content: center; align-items: center; flex-direction: column;
+      }
+      
+      .table-header { @apply p-3 border border-cyan-600 text-center font-bold; }
+      .table-cell { @apply p-3 border border-gray-300; }
+    </style>
+  </head>
+  <body>
+    
+    <!-- 初始化遮罩 -->
+    <div id="init-overlay">
+      <div class="loader" style="width: 50px; height: 50px; border-width: 5px;"></div>
+      <p class="mt-4 text-gray-700 font-bold text-lg tracking-wider" id="loadingText">正在下載資料庫...</p>
+      <p class="mt-2 text-gray-400 text-sm hidden" id="errorDetail"></p>
+    </div>
+
+    <div class="max-w-7xl mx-auto bg-white shadow-xl min-h-screen flex flex-col">
+      <!-- 標題區 -->
+      <div class="bg-white p-6 text-center border-b-4 border-blue-600">
+        <h1 class="text-3xl font-extrabold text-gray-800 tracking-wider mb-2">115學年度 學生個人資訊查詢</h1>
+        <p id="headerInfo" class="text-xl font-bold text-blue-600">請選擇年級與班級 或 使用快速搜尋</p>
+      </div>
+
+      <!-- 公告區 -->
+      <div class="bg-yellow-50 p-4 text-center border-b border-yellow-200">
+        <p class="font-bold text-gray-800 text-lg mb-2">全校同學均已開通「Google大溪國中雲端帳號」！</p>
+        <div class="flex flex-wrap justify-center gap-3 text-sm font-medium">
+           <span class="bg-orange-100 text-orange-800 px-3 py-1 rounded border border-orange-200">Scratch帳號：f51xxxxx</span>
+           <span class="bg-green-100 text-green-800 px-3 py-1 rounded border border-green-200">學習吧帳號：TYCDSxxxxx</span>
+        </div>
+      </div>
+
+      <!-- ★新增：快速搜尋區 -->
+      <div class="p-6 bg-white border-b border-gray-200">
+        <label for="keywordInput" class="block text-lg font-bold text-gray-700 mb-2">快速搜尋</label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+             <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </div>
+          <input type="text" id="keywordInput" class="block w-full p-3 pl-10 text-base text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="輸入姓名、學號或班級關鍵字 (例如: 黃曉伍, 701)..." oninput="performQuickSearch()">
+        </div>
+      </div>
+
+      <!-- 查詢控制區 (原本的年級班級篩選) -->
+      <div class="p-6 bg-gray-100 flex justify-center items-center gap-6 flex-wrap border-b border-gray-200 shadow-inner">
+        <div class="flex items-center bg-white px-3 py-2 rounded-lg shadow-sm border border-gray-300">
+          <label class="font-bold mr-2 text-gray-700 text-lg">年級：</label>
+          <select id="yearSelect" onchange="updateClassOptions()" class="p-1 outline-none font-bold text-blue-700 text-xl w-24 cursor-pointer bg-transparent">
+            <option value="">...</option>
+          </select> 
+          <span class="ml-1 text-gray-500 font-bold">年</span>
+        </div>
+        
+        <div class="flex items-center bg-white px-3 py-2 rounded-lg shadow-sm border border-gray-300">
+          <label class="font-bold mr-2 text-gray-700 text-lg">班級：</label>
+          <select id="classSelect" class="p-1 outline-none font-bold text-blue-700 text-xl w-24 cursor-pointer bg-transparent">
+             <option value="">--</option>
+          </select> 
+          <span class="ml-1 text-gray-500 font-bold">班</span>
+        </div>
+
+        <button onclick="search()" id="searchBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-10 rounded-lg shadow-lg transition transform active:scale-95 text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+          <span>查詢</span>
+        </button>
+      </div>
+
+      <!-- 資料顯示區 -->
+      <div class="p-4 md:p-8 overflow-x-auto flex-grow bg-white">
+        <div id="loadingMsg" class="hidden text-center text-gray-500 py-16">
+          <div class="loader mr-2"></div> 
+          <span class="text-xl font-medium text-gray-600">資料讀取中...</span>
+        </div>
+
+        <table id="resultTable" class="w-full text-left border-collapse hidden min-w-[900px]">
+          <thead>
+            <tr class="bg-cyan-600 text-white text-base">
+              <th class="table-header w-24">班級</th>
+              <th class="table-header w-24">座號</th>
+              <th class="table-header w-40">學號</th>
+              <th class="table-header w-32">姓名</th>
+              <th class="table-header">E-mail</th>
+              <th class="table-header">Scratch</th>
+              <th class="table-header">學習吧</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody" class="text-base text-gray-800"></tbody>
+        </table>
+        
+        <div id="noDataMsg" class="hidden flex flex-col items-center justify-center py-20 text-gray-400">
+          <p class="text-2xl font-bold text-gray-500">查無資料</p>
+        </div>
+      </div>
+      
+      <div class="bg-gray-50 p-3 text-center text-gray-400 text-sm border-t border-gray-200">
+        系統設計：溪中資訊組
+      </div>
+    </div>
+
+    <script>
+      // ==========================================
+      // 【設定區】請設定您的 JSON 資料檔路徑
+      // ==========================================
+      const JSON_DATA_URL = "students115.json"; 
+      // ==========================================
+      
+      var allStudentData = []; // 儲存所有學生資料
+      var schoolStructure = {}; // 儲存年級結構
+
+      // 1. 網頁載入時
+      window.onload = function() {
+        document.getElementById('init-overlay').style.display = 'flex';
+        try {
+          fetch(JSON_DATA_URL)
+            .then(res => {
+              if (!res.ok) throw new Error("網路回應錯誤 (404/500) 或找不到檔案");
+              return res.json();
+            })
+            .then(data => {
+              console.log("資料下載成功，共 " + data.length + " 筆");
+              allStudentData = data;
+              parseStructure(data);
+              initDropdowns(schoolStructure);
+            })
+            .catch(err => {
+              console.warn("無法讀取 " + JSON_DATA_URL + "，啟用預覽模擬模式:", err);
+              useMockData(err.message);
+            });
+        } catch (e) {
+          console.warn("Fetch 執行失敗，啟用預覽模擬模式:", e);
+          useMockData(e.message);
+        }
+      };
+
+      // 使用模擬資料 (防呆)
+      function useMockData(errorMsg) {
+        var mockData = [
+          {"year": "7", "class": "01", "seat": "01", "id": "1150001", "name": "預覽-王小明", "email": "demo1@dsjh.tyc.edu.tw", "scratch": "s1150001", "learn": "L1150001"},
+          {"year": "7", "class": "01", "seat": "02", "id": "1150002", "name": "預覽-陳大文", "email": "demo2@dsjh.tyc.edu.tw", "scratch": "s1150002", "learn": "L1150002"},
+          {"year": "8", "class": "05", "seat": "05", "id": "1140505", "name": "預覽-林小美", "email": "demo3@dsjh.tyc.edu.tw", "scratch": "s1140505", "learn": "L1140505"},
+          {"year": "9", "class": "08", "seat": "01", "id": "1130801", "name": "預覽-張志豪", "email": "demo4@dsjh.tyc.edu.tw", "scratch": "s1130801", "learn": "L1130801"}
+        ];
+        allStudentData = mockData;
+        parseStructure(mockData);
+        initDropdowns(schoolStructure);
+        
+        var loadingText = document.getElementById('loadingText');
+        var errorDetail = document.getElementById('errorDetail');
+        if (loadingText) loadingText.innerText = "預覽模式 (無資料檔)";
+        if (errorDetail) {
+           errorDetail.innerText = "原因: " + errorMsg;
+           errorDetail.classList.remove('hidden');
+        }
+        setTimeout(function() {
+           document.getElementById('init-overlay').style.display = 'none';
+        }, 800);
+      }
+
+      function parseStructure(data) {
+        schoolStructure = {};
+        data.forEach(student => {
+          let y = String(student.year || "").trim();
+          let c = String(student.class || "").trim();
+          if (y && c) {
+            if (c.length === 1) c = "0" + c;
+            if (!schoolStructure[y]) schoolStructure[y] = [];
+            if (!schoolStructure[y].includes(c)) schoolStructure[y].push(c);
+          }
+        });
+        for (let y in schoolStructure) schoolStructure[y].sort();
+      }
+
+      function initDropdowns(structure) {
+        var yearSelect = document.getElementById('yearSelect');
+        yearSelect.innerHTML = "";
+        var years = Object.keys(structure).sort((a, b) => a - b);
+
+        if (years.length === 0) {
+          yearSelect.innerHTML = "<option>無資料</option>";
+          document.getElementById('init-overlay').style.display = 'none';
+          return;
+        }
+        years.forEach(y => {
+          var opt = document.createElement('option');
+          opt.value = y; opt.innerText = y; yearSelect.appendChild(opt);
+        });
+        updateClassOptions();
+        document.getElementById('init-overlay').style.display = 'none';
+      }
+
+      function updateClassOptions() {
+        var yearSelect = document.getElementById('yearSelect');
+        var classSelect = document.getElementById('classSelect');
+        classSelect.innerHTML = ""; 
+        var selectedYear = yearSelect.value;
+        var classes = schoolStructure[selectedYear];
+        if (classes) {
+          classes.forEach(c => {
+            var opt = document.createElement('option');
+            opt.value = c; opt.innerText = c; classSelect.appendChild(opt);
+          });
+        } else {
+           classSelect.innerHTML = "<option>--</option>";
+        }
+      }
+
+      // ★新增：快速搜尋功能
+      function performQuickSearch() {
+        var keyword = document.getElementById('keywordInput').value.trim().toLowerCase();
+        
+        // 如果關鍵字為空，則回復到原本的「尚未查詢」狀態，或是根據選單重新查詢
+        if (!keyword) {
+            // 清空表格
+            document.getElementById('resultTable').classList.add('hidden');
+            document.getElementById('noDataMsg').classList.add('hidden');
+            document.getElementById('headerInfo').innerText = "請選擇年級與班級 或 使用快速搜尋";
+            return;
+        }
+
+        // 進行全域搜尋
+        const results = allStudentData.filter(st => {
+            let y = String(st.year || "").trim();
+            let c = String(st.class || "").trim();
+            if (c.length === 1) c = "0" + c;
+            
+            // 組合出可能的搜尋字串，例如 "701", "7年1班", "姓名"
+            let fullClass = y + c; // 701
+            let searchText = (st.name + " " + st.id + " " + fullClass + " " + st.seat).toLowerCase();
+            return searchText.includes(keyword);
+        });
+
+        // 排序：先比年級班級，再比座號
+        results.sort((a, b) => {
+             let classA = Number(a.year) * 100 + Number(a.class);
+             let classB = Number(b.year) * 100 + Number(b.class);
+             if (classA !== classB) return classA - classB;
+             return Number(a.seat) - Number(b.seat);
+        });
+
+        // 更新標題
+        document.getElementById('headerInfo').innerText = `搜尋關鍵字：「${keyword}」 (共 ${results.length} 筆)`;
+        
+        // 顯示結果
+        showData(results);
+      }
+
+      // 原本的選單查詢
+      function search() {
+        var year = document.getElementById('yearSelect').value;
+        var cls = document.getElementById('classSelect').value;
+        
+        if (!year || !cls) { alert("請選擇完整"); return; }
+        
+        // 清空搜尋框，避免混淆
+        document.getElementById('keywordInput').value = "";
+
+        document.getElementById('headerInfo').innerText = `查詢中：${year} 年 ${cls} 班...`;
+        document.getElementById('loadingMsg').classList.remove('hidden');
+        document.getElementById('resultTable').classList.add('hidden');
+        document.getElementById('noDataMsg').classList.add('hidden');
+        document.getElementById('searchBtn').disabled = true;
+
+        setTimeout(() => {
+            const results = allStudentData.filter(student => {
+                let sy = String(student.year || "").trim();
+                let sc = String(student.class || "").trim();
+                if (sc.length === 1) sc = "0" + sc; 
+                return sy === year && sc === cls;
+            });
+            
+            results.sort((a, b) => Number(a.seat) - Number(b.seat));
+            
+            document.getElementById('headerInfo').innerText = `班級：${year} 年 ${cls} 班 一般班`;
+            showData(results);
+        }, 200);
+      }
+
+      function showData(data) {
+        var tbody = document.getElementById('tableBody');
+        tbody.innerHTML = ""; 
+        document.getElementById('loadingMsg').classList.add('hidden');
+        document.getElementById('searchBtn').disabled = false;
+        
+        if (!data || data.length === 0) {
+          document.getElementById('noDataMsg').classList.remove('hidden');
+          document.getElementById('resultTable').classList.add('hidden');
+          return;
+        }
+
+        document.getElementById('noDataMsg').classList.add('hidden');
+
+        data.forEach(st => {
+          let y = String(st.year || "").trim();
+          let c = String(st.class || "").trim();
+          if (c.length === 1) c = "0" + c;
+          
+          // 顯示完整班級代號，例如 701
+          let displayClass = y + c; 
+
+          var tr = document.createElement('tr');
+          tr.className = "hover:bg-cyan-50 even:bg-slate-50 border-b";
+          tr.innerHTML = `
+            <td class="table-cell text-center font-bold text-blue-800">${displayClass}</td>
+            <td class="table-cell text-center font-medium">${st.seat}</td>
+            <td class="table-cell text-gray-600">${st.id}</td>
+            <td class="table-cell text-blue-600 font-bold underline cursor-pointer hover:text-blue-800 text-lg" onclick="window.open('http://gmail.com/', '_blank')" title="前往 Gmail">${st.name}</td>
+            <td class="table-cell font-mono text-sm">${st.email}</td>
+            <td class="table-cell text-blue-500 underline cursor-pointer hover:text-blue-700" onclick="window.open('https://scratch.mit.edu/', '_blank')" title="前往 Scratch">${st.scratch}</td>
+            <td class="table-cell text-blue-500 underline cursor-pointer hover:text-blue-700" onclick="window.open('https://www.learnmode.net/home/', '_blank')" title="前往 學習吧">${st.learn}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+        document.getElementById('resultTable').classList.remove('hidden');
+      }
+    </script>
+  </body>
+</html>

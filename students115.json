@@ -102,16 +102,6 @@
   {
     "year": "7",
     "class": "01",
-    "seat": "11",
-    "id": "1150011",
-    "name": "饒靖翔",
-    "email": "1150011@dsjh.tyc.edu.tw",
-    "scratch": "f511150011",
-    "learn": "TYCDS1150011"
-  },
-  {
-    "year": "7",
-    "class": "01",
     "seat": "21",
     "id": "1150012",
     "name": "江玉萱",
@@ -1652,16 +1642,6 @@
   {
     "year": "7",
     "class": "07",
-    "seat": "24",
-    "id": "1150167",
-    "name": "徐唯恩",
-    "email": "1150167@dsjh.tyc.edu.tw",
-    "scratch": "f511150167",
-    "learn": "TYCDS1150167"
-  },
-  {
-    "year": "7",
-    "class": "07",
     "seat": "25",
     "id": "1150168",
     "name": "張芝華",
@@ -2138,16 +2118,6 @@
     "email": "1150215@dsjh.tyc.edu.tw",
     "scratch": "f511150215",
     "learn": "TYCDS1150215"
-  },
-  {
-    "year": "7",
-    "class": "09",
-    "seat": "21",
-    "id": "1150216",
-    "name": "王辰晰",
-    "email": "1150216@dsjh.tyc.edu.tw",
-    "scratch": "f511150216",
-    "learn": "TYCDS1150216"
   },
   {
     "year": "7",
@@ -2708,6 +2678,16 @@
     "email": "1140043@dsjh.tyc.edu.tw",
     "scratch": "f511140043",
     "learn": "TYCDS1140043"
+  },
+  {
+    "year": "8",
+    "class": "02",
+    "seat": "28",
+    "id": "1140045",
+    "name": "陳荃",
+    "email": "1140045@dsjh.tyc.edu.tw",
+    "scratch": "f511140045",
+    "learn": "TYCDS1140045"
   },
   {
     "year": "8",
@@ -5531,16 +5511,6 @@
   },
   {
     "year": "9",
-    "class": "04",
-    "seat": "34",
-    "id": "1130262",
-    "name": "李語涵",
-    "email": "1130262@dsjh.tyc.edu.tw",
-    "scratch": "f511130262",
-    "learn": "TYCDS1130262"
-  },
-  {
-    "year": "9",
     "class": "05",
     "seat": "01",
     "id": "1130113",
@@ -6838,6 +6808,16 @@
     "email": "1130244@dsjh.tyc.edu.tw",
     "scratch": "f511130244",
     "learn": "TYCDS1130244"
+  },
+  {
+    "year": "9",
+    "class": "09",
+    "seat": "28",
+    "id": "1130262",
+    "name": "李語涵",
+    "email": "1130262@dsjh.tyc.edu.tw",
+    "scratch": "f511130262",
+    "learn": "TYCDS1130262"
   },
   {
     "year": "9",

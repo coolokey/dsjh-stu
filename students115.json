@@ -1612,6 +1612,16 @@
   {
     "year": "7",
     "class": "07",
+    "seat": "14",
+    "id": "1150230",
+    "name": "蔣睿宇",
+    "email": "f511150230@dsjh.tyc.edu.tw",
+    "scratch": "f511150230",
+    "learn": "TYCDS1150230"
+  },
+  {
+    "year": "7",
+    "class": "07",
     "seat": "21",
     "id": "1150164",
     "name": "田宇芯",
@@ -3238,6 +3248,16 @@
     "email": "f511140228@dsjh.tyc.edu.tw",
     "scratch": "f511140228",
     "learn": "TYCDS1140228"
+  },
+  {
+    "year": "8",
+    "class": "04",
+    "seat": "35",
+    "id": "1140229",
+    "name": "邱采婕",
+    "email": "f511140229@dsjh.tyc.edu.tw",
+    "scratch": "f511140229",
+    "learn": "TYCDS1140229"
   },
   {
     "year": "8",
